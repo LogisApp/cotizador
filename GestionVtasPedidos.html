@@ -1,0 +1,21 @@
+<!-- Contenido de la aplicación de Pedidos -->
+<script>
+  function pag_Pedidos()
+  {
+    const pag=`
+      <div class="d-flex p-2 bg-secondary text-white">
+<span>parte 1</span>
+      <div>
+
+      <div class="d-flex p-2 tdatos text-white">
+<span>parte 2</span>
+      </div>`
+    const pag2='FormatoCotizacion'
+    
+    google.script.run
+    .withSuccessHandler(coti=>{
+      document.getElementById('ModPedidosBody').innerHTML=coti
+    })
+    .include(pag2)
+  }
+</script>

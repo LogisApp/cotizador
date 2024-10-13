@@ -1,0 +1,605 @@
+<script>
+    var espera       = document.getElementById('circle')
+    var firma        = ''
+    var vende        = ''
+    var id_rol       = '' //document.getElementById('rol')
+    const xsucursal  = document.getElementById('xsucursal');
+    const ysucursal  = document.getElementById('ysucursal');
+    const xproducto  = document.getElementById('xproducto');
+    const xgraficos  = document.getElementById('xgraficos');
+    const xcita      = document.getElementById('xcita');
+    const ximpuesto  = document.getElementById('ximpuesto');
+    const yvendedor  = document.getElementById('yvendedor');
+    const id_ven     = document.getElementById('vendedor')
+    var titulo       = document.getElementById('titulo')
+    const mainSection = document.querySelector('#containner_centro');
+    var obj          = {}
+    var cachedData   = []
+    var fecha_cierre = ''
+    var tableData    = []
+//-----------------------------
+    window.addEventListener('DOMContentLoaded', (event) => {
+      xsucursal.focus()
+      var xsql=` select empresa,codsucursal,nombre,nit,dv,iva*100 as iva,e_mail from v_empresas order by empresa,codsucursal `;
+      loadInfo(xsql,(data)=>{
+        asignaValor('ysucursal',[{empresa:data[0].empresa, iva:data[0].iva}],'')
+        ysucursal.title='Empresa : '+data[0].empresa+' '+data[0].nombre
+////        document.getElementById('ximpuesto').value=MASK(data[0].iva,'##')  // Temporalmente suspendida
+
+        // Crear la ventana emergente (div)
+        // Obtener la posición del botón que desencadenó el evento
+        const botonRect = ysucursal.getBoundingClientRect();
+
+        const ventanaEmergente = document.getElementById("ventanaEmergente");
+        ventanaEmergente.style.top = botonRect.bottom + "px";
+        ventanaEmergente.style.left = botonRect.left + "px";
+
+        const contenido = document.querySelector(".contenido");
+        const ul = document.createElement("ul");
+
+        // Crear las opciones de la lista (li) y enlaces (a)
+        for (let i = 0; i < data.length; i++) { // Usar "opciones.length" en lugar de "length(data)"
+          const li = document.createElement("li");
+          const a  = document.createElement("a");
+          a.textContent = data[i].nombre;
+          a.className   = 'empresa'
+          a.setAttribute('dataL', JSON.stringify(data[i])); // Corrección de esta línea
+          li.appendChild(a);
+          ul.appendChild(li);
+        }
+
+        // Agregar la lista ul al contenido interno
+        contenido.appendChild(ul);
+
+        // Agregar el contenido interno a la ventana emergente
+        ventanaEmergente.appendChild(contenido);
+
+        // Mostrar la ventana emergente
+        document.body.appendChild(ventanaEmergente);
+      })
+      loadInfoSucursal()
+      xproducto.addEventListener('input',loadInfoProducto);   // desactivado temporalmente
+//      xcliente.addEventListener("change", buscar_cliente);
+
+    })
+//-------------------
+    function onKeyDownCli(event) {
+////      if (event.keyCode === 13 || event.keyCode === 32) { // Código de la tecla ENTER
+        loadInfoCliente(document.getElementById('xcliente').value); // No ejecutar la función si no se presionó la tecla ENTER
+////      }
+    }
+//-----------------------------
+    async function loadInfoCliente()
+    {
+      const xtercero=(this.value === undefined ? xcliente.value : this.value).toUpperCase();
+      if (xtercero.length < 3) return
+      if (xtercero.length < 4){
+        var que = (xtercero === undefined ? "'% %'" : "'" + xtercero + "%'");
+      }
+      else
+      {
+        var que = (xtercero === undefined ? "'% %'" : "'%" + xtercero + "%'");
+      }
+      var filteredData = cachedData.filter(item =>item.nombre.includes(xtercero) || (item.nombre.trim()+' | '+item.cliente.trim()).includes(xtercero));
+      if (filteredData.length === 0) 
+      {
+        let xsql=` select first 60 * from ${empresa()}${base}v_clientes where (cliente like ${que} or NOMBRE like ${que} or (trim(NOMBRE) || ' | ' || trim(CLIENTE)) like ${que}) order by nombre `;
+        loadInfo(xsql,(data)=>{
+          cachedData = data; // Almacenar los datos recuperados de la API
+          cargaDataCliente(data)
+        })
+      }
+      else
+        cargaDataCliente(filteredData)
+    }
+//-----------------------------    
+    function cargaDataCliente(data)
+    {
+      drilldown(data,'datalistCliente',['nombre','cliente'],false)
+////      buscar_cliente()
+      espera.style.display='none'
+    }
+//-----------------------------
+    async function buscar_cliente() 
+    {
+      if (sw_msg) console.log('*buscar_cliente*')
+      var xsaldo_disp=document.getElementById('xsaldo_disp')
+      var xdisponible=0
+      asignaValor('xcodigo',retornaDatal('xcliente','cliente'),'xcodigo')
+      asignaValor('xvendedor',retornaDatal('xcliente','codvendedor'),'xvendedor')
+      asignaValor('xnom_vend',retornaDatal('xcliente','nom_vend'),'xnom_vend')
+      asignaValor('xfpago',retornaDatal('xcliente','terminopago'),'descripcion')
+      asignaValor('xcontactos',retornaDatal('xcliente','nompago1'),'xcontactos')
+      loadInfoMail()
+      loadInfoVitacora9(retornaDatal('xcliente','cliente'))
+    }
+//-----------------------------    
+    function buscar_producto(e) 
+    {
+      
+      if (e.value.length == 0 || e.value == '' || e.value.indexOf('|')==-1) return
+      if (sw_msg) console.error('***buscar_producto***')
+      asignaValor('xprecio',retornaDatal('xproducto','prec_esc0'),'xprecio')
+      que=e.value.split('|').shift() // Extrae el primer elemento
+      //alert('datalistProducto' + que);
+      document.getElementById('xitem2').value=que;
+      var sucX =  retornaDatal('xsucursal','codsucursal')=='02' ? 'invcxc' : 'bogota'
+
+      if (retornaDatal('xcliente','cliente') != undefined)
+      {
+        //Ficha Tecnica Material
+        let xsql=` select * from ${empresa()}${base}materiales where cod_item='${que}' and codigo='${retornaDatal('xcliente','cliente')}' `
+        loadInfo(xsql,(data)=>{
+          espera.style.display='none'
+          if (data.length==0){
+            document.getElementById('xnorma').removeAttribute('disabled');
+            document.getElementById('xgrado').removeAttribute('disabled');
+            document.getElementById('xtpeso').focus();  
+            return
+          } 
+          document.getElementById('xnorma').setAttribute('disabled', '');
+          asignaValor('xnorma',data[0].norma_pt,'xnorma')
+          document.getElementById('xgrado').setAttribute('disabled', '');
+          asignaValor('xgrado',data[0].grado,'xgrado')
+          ficha_tecnica()
+          setTimeout(()=>{
+            var modal = document.getElementById("Ftecnica");
+            modal.style.display = "none";
+            modal.remove();
+            document.getElementById('Ftecnica').remove();
+            document.getElementById('xtpeso').focus()
+          }, 10000); // 5000 milisegundos = 5 segundos
+        })
+      }
+
+      if (!document.getElementById('hayexistencia').checked) return;
+
+      // Existencias
+      let xsql0=` select '01' as suc,codigo,existencia as kilos from ${empresa()}${base}item where codigo='${que}'  
+                 union
+                 select '02' as suc,codigo,existencia as kilos from ${sucX}${base}item where codigo='${que}' `
+      loadInfo(xsql0,cargaDataExistencia)
+
+      // Pedidos
+      xsql=` select '01' as suc,item,count(*) as veces,round(sum(kilos),0) as kilos from ${empresa()}${base}pedidodeta where item='${que}' group by suc,item `
+      xsql +=` union select '02' as suc,item,count(*) as veces,round(sum(kilos),0) as kilos from ${sucX}${base}pedidodeta where item='${que}' group by suc,item `
+
+      loadInfo(xsql,(data)=>{
+          cargaDataPedido(data)
+          buscarSheet(null,e.value)
+        document.getElementById('xtpeso').focus()
+      })
+    }
+//--------------------------------
+    async function loadInfoFpago()
+    {
+      let xsql=` select codigo,descripcion from v_condicionescxc order by codigo`;
+      loadInfo(xsql,cargaDataFpago)
+    }
+//--------------------------------
+    function cargaDataFpago(data)
+    {
+      drilldown(data,'xfpago',['codigo','descripcion'],false)
+      espera.style.display='none'
+    }
+//--------------------------------
+    function cargaDataExistencia(data)
+    {
+      drilldown(data,'xexistencia',['suc','kilos'],false)
+      espera.style.display='none'    
+    }
+//--------------------------------
+    function cargaDataPedido(data)
+    {
+      const kilosTotal = data.reduce((accumulator, currentValue) => {
+        return accumulator + parseInt(currentValue.kilos);
+      }, 0);
+      drilldown(data,'xpedidos',['suc','kilos','veces'],false)
+      espera.style.display='none'    
+    }
+//--------------------------------
+    function buscarSheet(event,value) 
+    {
+      if (value == null || value == '') return
+      if(event) event.preventDefault(); // Prevención del menú contextual
+      if(!retornaDatal('haydetalles')) return
+        console.log(value)  
+        xcodmp=value.split('|')[2]  // extrae el codigo de la Materia Prima
+        xcod=value.split('|').shift() // Extrae el primer elemento
+        var html='<button class="btn-close close-button" aria-label="Close" style="width: 1vw; height: 2vh;"></button>'
+        html +='*-'+xcod+'-*<br>'
+        html +='Puntas   : '+retornaDatal('xproducto','puntas')+'<br>'
+        html +='Transito : '+'<br>'
+        html +='Traslado : '+'<br>'
+        document.getElementById('xproducto_tooltip1').innerHTML=html;
+//----
+const modalElement = document.querySelector(".LtooltipModal");
+const lcloseButton = document.querySelector(".close-button");
+// Función para cerrar la ventana modal
+const cerrarModal = ()=> {
+  modalElement.classList.remove("visible");
+}
+
+// Función para mostrar la ventana modal
+const mostrarModal = ()=> {
+  modalElement.classList.add("visible");
+}
+mostrarModal()
+
+$(document).ready(() => {
+  // Agregar el evento al elemento padre
+  $(".LtooltipModal").on("click", ".close-button", cerrarModal);
+  // Permite movel el modal
+  $(`.LtooltipModal`).draggable({  //Modal Movible
+    handle: ".modal-header-t"  // modal-content = Mover desde cualquier parte  // modal-title = Mover desde el titulo  
+  });  
+});
+//----
+        google.script.run
+        .withSuccessHandler((data)=>{
+          const xprod =buscarCeldasSheetPro(xcod.trim(),data)
+  //console.log(xprod)
+          html=html+'__Produccion__ <br>'
+          xprod.forEach (fila => { 
+            if (fecha(new Date(),0,'d') >= fila.Dia) html +=(`Dia: ${fila.Dia} Kls: ${fila.Valor} <br>`)
+            })
+            document.getElementById('xproducto_tooltip1').innerHTML=html
+        })
+        .getDataProduccion(fecha(new Date(),0,'ym')) // trae los datos de google sheet de producion
+
+        google.script.run
+        .withSuccessHandler((data)=>{
+console.log(data)
+          const xcom_mp =buscarCeldasSheetMP(xcodmp.trim(),data)
+  //console.log(xcom_mp)        
+          html +='___Mp___ <br>'
+          xcom_mp.forEach (fila => { 
+            html +=(`Fecha: ${fila.Fecha} Kls: ${fila.Kilos} <br>`)
+            })
+            document.getElementById('xproducto_tooltip1').innerHTML=html
+        })
+        .getDataMP('CONSOLIDADO')
+      
+        google.script.run
+        .withSuccessHandler((data)=>{
+console.log(data)
+          const xcom_mp =buscarCeldasSheetMP(xcod.trim(),data)
+  //console.log(xcom_mp)        
+          html +='___Importacion___ <br>'
+          xcom_mp.forEach (fila => { 
+            html +=(`Fecha: ${fila.Fecha} Kls: ${fila.Kilos} <br>`)
+            })
+            document.getElementById('xproducto_tooltip1').innerHTML=html
+        })
+      .getDataMP('CONSOLIDADO')
+    }
+//-------------------
+    document.getElementById('xsucursal').addEventListener('change', function()  
+    {
+      espera.style.display=''
+      if (this.value !='') buscar_sucursal(this)
+    });
+//-------------------
+    ysucursal.addEventListener('click',function()
+    {
+      espera.style.display='none'
+      //cambio de empresa
+      xsucursal.value=''
+      ysucursal.style.pointerEvents = 'none';
+      // Obtener la posición del botón que desencadenó el evento
+      const botonRect = ysucursal.getBoundingClientRect();
+
+      // Crear la ventana emergente (div)
+      const ventanaEmergente = document.getElementById("ventanaEmergente");
+      ventanaEmergente.style.display = "block";
+      ventanaEmergente.style.top = botonRect.bottom + "px";
+      ventanaEmergente.style.left = botonRect.left + "px";
+
+      // Evitar que el evento click se propague
+      event.stopPropagation();
+
+      // Cerrar la ventana emergente si se hace clic fuera de ella
+      ventanaEmergente.addEventListener("click", function (event) {
+        // Seleccionar todos los elementos <a> con la clase "empresa"
+        const elementosEmpresa = document.querySelectorAll('a.empresa');
+
+        if (elementosEmpresa.length >0) 
+        {
+          var yempresa=JSON.parse(event.target.attributes[1].nodeValue)
+          asignaValor('ysucursal',[{empresa:yempresa.empresa ,iva:yempresa.iva}],'')
+          ysucursal.title='Empresa : '+yempresa.empresa+' '+yempresa.nombre
+          ventanaEmergente.style.display = "none";
+          ysucursal.style.pointerEvents = '';
+          titulo.innerHTML='&#9776 Gestion de Ventas - ' + yempresa.nombre
+          if (yempresa.empresa === '01')
+            titulo.style.backgroundColor = 'rgb(0, 44, 111)'
+          else
+            titulo.style.backgroundColor = 'rgb(4, 100, 60)'
+        }
+        // Evitar que el evento click se propague
+        event.stopPropagation();
+      });
+    });
+//-------------------
+    function buscar_sucursal(e) 
+    {
+      if (sw_msg)console.log('*buscar_sucursal*')
+      if (e.value=='') return 
+      const select = document.getElementById("xsucursal");
+      const opcionSeleccionada = select.options[select.selectedIndex];
+      loadInfo(` select ${empresa()}${base}f_fecha_cierre() as fecha from cxcempresa `,(data)=>{
+        fecha_cierre=data[0].fecha
+      })
+      espera.style.display='none'
+      toggleSidebar()
+    }
+//-------------------
+    async function loadInfoSucursal()
+    {
+      espera.style.display=''
+      let xsql=` select first 2 codsucursal,substr(nombre,6,10) as nombre from sucursal `;
+      loadInfo(xsql,cargaDataSucursal)
+    }
+//------------------
+    function cargaDataSucursal(data)
+    {
+      drilldown(data,'xsucursal',['codsucursal','nombre'],true)
+      espera.style.display='none'
+
+    }
+//-------------------
+    async function loadInfoUnidades()
+    {
+      let xsql=` select * from unidades `;
+      loadInfo(xsql,cargaDataUnidades)
+    }
+//-------------------
+    function cargaDataUnidades(data)
+    {
+      drilldown(data,'xtpeso',['codigo'],true)
+      espera.style.display='none'
+    }
+//-------------------
+    async function loadInfoEscala()
+    {
+      let xsql=` select * from escala `;
+      loadInfo(xsql,cargaDataEscala)
+    }
+//-------------------
+    function cargaDataEscala(data)
+    {
+      drilldown(data,'xescala',['codigo','nombre'],true)
+      espera.style.display='none'
+    }
+//-------------------
+    function onKeyDownPro(event) {
+      if (event.keyCode === 13 || event.keyCode === 32) { // Código de la tecla ENTER
+        loadInfoProducto(document.getElementById('xproducto').value);
+      }
+    }
+//-------------------
+    async function loadInfoProducto(p)
+    {
+      if (event.keyCode !== 13 && event.keyCode !== 32) {
+        return; // No ejecutar la función si no se presionó la tecla ENTER
+      }      
+      const xproducto=p; // this.value;
+      if (xproducto.length > 1)
+      {
+        if (xproducto.length < 3){
+          var que = (xproducto === undefined ? "'% %'" : "'" + xproducto.toUpperCase() + "%'");
+        }
+        else
+        {
+          var que = (xproducto === undefined ? "'% %'" : "'%" + xproducto.toUpperCase() + "%'");
+        }
+        var hay=''
+        if (document.getElementById('hayexistencia').checked) hay='and existencia<>0'
+
+        let xsql=` select first 100 codigo,nombre,existencia,prec_esc0,prec_esc1,prec_esc2,prec_esc3,prec_esc9,peso_teo,cod_mp,puntas,tipo_medida,prec_costo from ${empresa()}${base}item where (subgrupo<>'5' and left(nombre,5) <> '.....') ${hay} and (upper(nombre) like ${que} or codigo like ${que}) order by codigo`;
+        loadInfo(xsql,cargaDataProducto)
+      }
+    }
+//-------------------
+    function cargaDataProducto(data)
+    {
+      drilldown(data,'datalistProducto',['codigo','nombre','cod_mp','existencia','puntas'],false)
+      espera.style.display='none'
+    }
+//-------------------
+  function empresa()
+  {
+    const dataDatalValue = ysucursal.getAttribute('data-datal');
+    // Convertir la cadena JSON en un objeto JavaScript
+    const dataObject = JSON.parse(dataDatalValue);
+    // Acceder a las propiedades del objeto
+    switch (dataObject[0].empresa) {
+      case '01':
+        return retornaDatal('xsucursal','codsucursal')=='01' ? 'invcxc' : 'bogota'
+        break
+      case '02':{
+        return retornaDatal('xsucursal','codsucursal')=='01' ? 'numacmed' : 'numacbog'
+        break
+      }
+    }
+  }
+//--------------------
+  function limpiar_campos()
+  {
+      xcliente.value=''
+      xcodigo.value=''
+      xvendedor.value=''
+      xnom_vend.value=''
+  }  
+//--------------------
+// Función para mostrar/ocultar el menú lateral al hacer clic en el icono de hamburguesa
+  function toggleSidebar(e) 
+  {
+    var sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('active');
+    if (sidebar.classList.contains('active')) {
+      containner_centro.classList.remove('containner_centro');
+      containner_centro.classList.add('containner_centro_2');
+    } else {
+      containner_centro.classList.add('containner_centro');
+      containner_centro.classList.remove('containner_centro_2');
+    }
+    if (e===undefined) return
+    const contenedorCentro = document.querySelector('#containner_centro');
+    const secciones = contenedorCentro.querySelectorAll('section');
+
+    for (const seccion of secciones) {
+      // Accede a la información de cada sección
+//      console.log(`ID: ${seccion.id}`);
+//      console.log(`Contenido: ${seccion.textContent}`);
+      document.querySelector('#'+`${seccion.id}`).hidden=true
+      // Puedes realizar acciones con cada sección, como agregar estilos, modificar contenido, etc.
+    }
+
+    var pagina='pag_'+e+'()'
+    document.querySelector('#'+e).hidden=false
+    if (document.querySelector('#'+e).textContent=='')
+    {
+      //---- crea tarjeta del (+) Nuevo
+      const seccion = document.getElementById(e);
+      const tarjetaElement = document.createElement('div');
+      tarjetaElement.classList.add('tarjeta');
+      tarjetaElement.id='Car'+e;
+
+      const tituloElement = document.createElement('h2');
+      tituloElement.classList.add('titulot');
+      tituloElement.textContent = e;
+
+      const imagenElement = document.createElement('img');
+      imagenElement.classList.add('imagen');
+      //https://drive.google.com/file/d/1_jtrNxX01bP3NpzOtBJ8VHTmK_x9LhMW/
+      imagenElement.src = "https://lh3.google.com/d/1_jtrNxX01bP3NpzOtBJ8VHTmK_x9LhMW";
+
+      const descripcionElement = document.createElement('button');
+      descripcionElement.classList.add('boton');
+      descripcionElement.style.color = 'white';
+      descripcionElement.innerHTML = '<i class="far fa-file"></i>';
+      descripcionElement.id='Btn'+e;
+      descripcionElement.title = 'Nuevo Pedido';
+      descripcionElement.addEventListener("click",()=>{
+        cardX(e)
+      });
+
+      tarjetaElement.appendChild(tituloElement);
+      tarjetaElement.appendChild(imagenElement);
+      tarjetaElement.appendChild(descripcionElement);
+
+      seccion.appendChild(tarjetaElement);
+      //-----------------------
+////      eval(pagina)
+    } 
+  }
+//---------------------
+  function cardX(e)
+  {
+    const seccion = document.getElementById(e);
+    const tarjetaElement1 = document.createElement('div');
+    tarjetaElement1.classList.add('tarjeta');
+    tarjetaElement1.id='CarC'+e;
+
+    const tituloElement1 = document.createElement('h2');
+    tituloElement1.classList.add('titulot');
+    tituloElement1.textContent = e;
+
+    const imagenElement1 = document.createElement('img');
+////    imagenElement1.classList.add('imagen');
+////    imagenElement1.src = "https://lh3.google.com/d/1_jtrNxX01bP3NpzOtBJ8VHTmK_x9LhMW";
+
+    const descripcionElement1 = document.createElement('button');
+    descripcionElement1.classList.add('boton');
+    descripcionElement1.style.color = '#f0f507';
+    descripcionElement1.innerHTML = '<i class="far fa-edit"></i>';
+    descripcionElement1.id = 'BtnCA'+e;
+    descripcionElement1.title = 'Actualizar';
+    descripcionElement1.addEventListener("click",()=>{
+      var idmodal='Mod'+e
+      showModal(idmodal,e,0)
+      var myModal = new bootstrap.Modal(document.getElementById(idmodal))  // Crea Ventana Modal
+      if (e=='Cotizaciones') {pag_Cotizaciones()} else if (e=='Pedidos') {pag_Pedidos()} else {pag_Remisiones()}
+      myModal.show()
+    });
+
+    const descripcionElement2 = document.createElement('button');
+    descripcionElement2.classList.add('boton');
+    descripcionElement2.style.color = '#3dff00';
+    descripcionElement2.innerHTML = '<i class="far fa-paper-plane"></i>';
+    descripcionElement2.id = 'BtnCE'+e;
+    descripcionElement2.title = 'Enviar';
+    descripcionElement2.addEventListener("click",()=>{alert('Enviar 2'+e)});
+
+    const descripcionElement3 = document.createElement('button');
+    descripcionElement3.classList.add('boton');
+    descripcionElement3.style.color = 'red';
+    descripcionElement3.innerHTML = '<i class="fas fa-trash"></i>';
+    descripcionElement3.id = 'BtnCE'+e;
+    descripcionElement3.title = 'Eliminar';
+    descripcionElement3.addEventListener("click",()=>{alert('Borrar 3'+e)});
+
+    tarjetaElement1.appendChild(tituloElement1);
+    tarjetaElement1.appendChild(imagenElement1);
+    tarjetaElement1.appendChild(descripcionElement1);
+    tarjetaElement1.appendChild(descripcionElement2);
+    tarjetaElement1.appendChild(descripcionElement3);
+
+    seccion.appendChild(tarjetaElement1);
+
+  }
+
+  async function loadInfoVitacora9(xcli)
+  {
+    if (xcli=='') return
+    var xsql=` select * from ${empresa()}${base}condccial where codigo='${xcli}' `
+    loadInfo(xsql,cargaDataVitacora9_new)
+  }
+
+  function cargaDataVitacora9_new(data)
+  {
+    if (data.length==0)
+    {
+      showMensaje('No Hay Datos')
+      document.getElementById('xproducto').focus()
+      return
+    }
+////    ttable ('V','modal1',data,'Condiciones Comerciales / '+retornaDatal('xcliente','nombre')+' / '+retornaDatal('xcliente','cliente'),'','','','modal-xl')
+    condiciones_comerciales(data)
+    setTimeout(()=>{
+      var modal = document.getElementById("Ccomerciales");
+      modal.style.display = "none";
+      modal.remove();
+      document.getElementById('Ccomerciales').remove();
+      document.getElementById('xproducto').focus()
+    }, 100000); // 5000 milisegundos = 5 segundos
+    espera.style.display='none'
+  }
+
+  function condiciones_comerciales(data)
+  {
+    var idmodal='Ccomerciales'
+    showModal(idmodal,'Condiciones Comerciales',0,'modal-xl')
+    var myModal = new bootstrap.Modal(document.getElementById(idmodal))  // Crea Ventana Modal
+    document.getElementById(idmodal+'Body').innerHTML=MOD_Cotizaciones2();
+    document.getElementById('CodCliente').value=data[0].codigo
+    document.getElementById('NomCliente').value=retornaDatal('xcliente','nombre')
+    myModal.show()
+  }
+
+  function ficha_tecnica(data)
+  {
+    var idmodal='Ftecnica'
+    showModal(idmodal,'Ficha Tecnica',0,'modal-xl')
+    var myModal = new bootstrap.Modal(document.getElementById(idmodal))  // Crea Ventana Modal
+    document.getElementById(idmodal+'Body').innerHTML=MOD_Cotizaciones1();
+    document.getElementById('CodCliente').value=retornaDatal('xcliente','codigo')
+    document.getElementById('NomCliente').value=retornaDatal('xcliente','nombre')
+    myModal.show()
+  }
+//---------------------
+
+
+
+</script>

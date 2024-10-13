@@ -1,0 +1,2213 @@
+<script>
+//////////////////////////////////////////////////////////////////////
+// Libreria de Funciones Generales Para usar en todos los proyectos //
+// Noviembre 29 -2022                                               //
+//////////////////////////////////////////////////////////////////////
+var base          = ':';    // (..) Sql  (:) Informix   //Base de Datos  Informix o SQL
+var sw_msg        = true;   // sw de mostrar mensages por consola
+var sw_1          = true;   // sw de ejecucion 1ra vez
+var swg           = false;  // 
+var campo_        = null;
+ 
+//-----------------------------------------------------------------------------------------------------------------------------------------
+function buscarNombre(data,input,xcpos,swb) 
+{
+  if (sw_msg)console.log('*buscarNombre*')
+  var xinput = document.getElementById(input).value.toLowerCase();
+  var resultados = data;
+
+  // Actualiza la lista desplegable
+  var datalist = document.getElementById("opciones");
+  datalist.innerHTML = "";
+
+  if (resultados.length > 0) {
+    for (var i = 0; i < resultados.length; i++) {
+      var opcion = document.createElement("option");
+      opcion.value = resultados[i];
+      opcion.name  = resultados[i];
+      datalist.appendChild(opcion);
+    }
+  }
+}
+////////////////////////////////////////
+// Funcion para hacer drilldown       //
+////////////////////////////////////////
+
+function drilldown(data,input,xcpos,swb)
+{
+  if (sw_msg)console.log('*drilldown*')
+////  if (sw_msg) console.log('*drilldown*')
+  let xinput=document.getElementById(input)
+  xinput.innerHTML=''
+  if (data.length>0)
+  {
+    if (input.indexOf('datalist')==0)
+    {
+      input='x'+input.substr(8,10).toLowerCase()
+      let xinput=document.getElementById(input)
+    } 
+  ////    xinput.setAttribute("dataL", JSON.stringify(data));
+
+    if (xinput)
+    {
+      const ycpos = xcpos.map(element => 'datosel.'+element+'').join(' + " | " + ');
+
+      if (swb) // SW opcion vacia
+      {
+        const option        = document.createElement("option");
+        option.value        = '';
+        option.text         = '';
+        xinput.appendChild( option );
+      }
+      data.forEach( datosel =>{
+      const option         =  document.createElement("option");
+  //    option.value         =  eval(`datosel.${cpo2}`);
+////       option.value        =  eval(` ${ycpos} `);
+       option.text         =  eval(` ${ycpos} `);
+
+      option.setAttribute('dataL', JSON.stringify(datosel));
+      option.setAttribute(`dataL${input}`, JSON.stringify(datosel));
+      xinput.appendChild( option );
+////      obj=data
+      })
+    }
+  }
+//  else  alert('No Hay Datos d')
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+///////////////////////////////////////
+// Menu Contextual Tabla
+///////////////////////////////////////
+function MenuContext(e, component){
+        //component - column/cell/row component that triggered the menu
+        //e - click event object
+
+        var menu = [];
+        if (sw_msg)console.log('*MenuContext*')
+        if (typeof component.getData=== 'function')
+        {
+          if(!component.getData().approved){
+              menu.push({
+                  label:"Approve User",
+                  action:function(e, column){
+                      component.update({"approved":true});
+                  }
+              })
+          }else{
+              menu.push({
+                  label:"Unapprove User",
+                  action:function(e, column){
+                      component.update({"approved":false});
+                  }
+              })
+          }
+        }
+        menu.push({
+            label:"<i class='fas fa-check-square'></i> Select Row",
+            action:function(e, row){
+                row.select();
+            }
+        },
+        {
+            separator:true,
+        },
+        {
+            label:"Admin Functions",
+            menu:[
+                {
+                    label:"<i class='fas fa-trash'></i> Delete Row",
+                    action:function(e, row){
+                        row.delete();
+                    }
+                },
+                {
+                    label:"<i class='fas fa-ban'></i> Disabled Option",
+                    disabled:true,
+                },
+            ]
+        },
+        {
+            label:"Descargar",
+            action:function(e, row){
+                      table.download("xlsx", "Pedidos.xlsx", {sheetName:"Pedidos"}, "visible");
+                    }
+        },
+        {
+            label: !swg ? "+Expandir" : "-Contraer",
+            action:function(e, row){
+              if (swg)
+                {
+                  table.setGroupStartOpen(false);
+                  swg=false
+                }
+                else
+                {
+                  table.setGroupStartOpen(true);
+                  swg=true
+                }
+             
+                table.setGroupBy("");
+                table.setGroupBy("item");
+            }
+        })
+        return menu;
+    }
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+////////////////////////////////////////
+// Funcion para llamar al API con Sql //
+////////////////////////////////////////
+
+async function loadInfo(xsql,funCarga)
+{
+  if (sw_msg)console.log('*loadInfo*')
+  if (typeof espera != 'undefined') espera.style.display=''
+  return await google.script.run
+    .withFailureHandler(onFailure)
+    .withSuccessHandler(funCarga)
+    .getDataSql(xsql)
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+//////////////////////////////
+// Funcion de error en API  //
+//////////////////////////////
+function onFailure(err) {
+  if (sw_msg)console.log('*onFailure*')
+  espera.style.display='none'
+  showMensaje('There was an error!' + err.message + ' Segmente los Datos');
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+/////////////////////////////////////////////////////////////////  
+// Funcion para realizar una tabla desde un objeto de datos
+/////////////////////////////////////////////////////////////////
+    function xtable(xdomTab,xdatos,xtitu,xmodal,xmod_titu,xmod_body)
+    {
+      if (sw_msg)console.log('*xtable*')
+      
+      $("#exampleModal").on("hidden.bs.modal", function () {
+        if (document.getElementById(xdomTab)) document.getElementById(xdomTab).remove();
+      });
+      if (document.getElementById('myChart')) document.getElementById('myChart').remove();
+      if (xdatos.length>0)
+      {
+        const modalTitle = document.querySelector(`.${xmod_titu}`); //Clase para el titulo
+        const modalBody = document.querySelector(`.${xmod_body}`);  //Clase para el Body del Modal
+        $(`#${xmodal}`).draggable({  //Modal Movible
+          handle: ".modal-content"  // Mover desde cualquier parte  // modal-title  // Mover desde el titulo  
+        });
+        if (myModal) myModal.remove();
+
+        var myModal = new bootstrap.Modal(document.getElementById(xmodal))  // Crea Ventana Modal
+        modalTitle.innerHTML=xtitu
+
+        // crea tabla y verifica si existe
+        if (document.getElementById(xdomTab)) document.getElementById(xdomTab).remove();
+        var tabla   = document.createElement("table");
+        tabla.setAttribute("class","table table-striped" )
+        tabla.setAttribute("id",xdomTab)
+        document.body.appendChild(tabla);
+
+    ////// Crea las titulos
+        var titu = document.createElement('thead')
+        titu.setAttribute('class','table-dark')
+        var hilera = document.createElement("tr");
+        titu.appendChild(hilera);
+if (sw_msg) console.log(Object.getOwnPropertyNames(xdatos[0]))
+        var j=0
+        for (key in xdatos[0])
+        {
+            var celda = document.createElement("th");
+            var textoCelda = document.createTextNode(key.toUpperCase());
+            celda.appendChild(textoCelda);
+            /// Formato
+    ////        celda.setAttribute("width",tits[j]+'%');
+            hilera.appendChild(celda);
+            j++
+        }
+        titu.appendChild(hilera);
+        tabla.appendChild(titu);
+        modalBody.appendChild(tabla);
+    /////---------------------------------------------------
+        var tblBody = document.createElement("tbody");
+        for (var i=0; i<xdatos.length; i++) {
+          var hilera = document.createElement("tr");
+          for (key in xdatos[0])
+          {
+            var celda=document.createElement('th')
+            var textoCelda= document.createTextNode(xdatos[i][key])
+            celda.appendChild(textoCelda)
+            hilera.appendChild(celda)
+          }
+          tabla.appendChild(hilera)
+          // posiciona el <tbody> debajo del elemento <table>
+    //      tabla.appendChild(tblBody);
+        }
+        modalBody.appendChild(tabla)
+        myModal.show()
+      }
+    }
+  
+  
+//-----------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------
+// formatea el input para mostrar separacion de miles
+//-------------------------
+    function format(input)
+    {
+      if (sw_msg)console.log('*format*')
+      var num = input.value.replace(/\./g,'');
+      if(!isNaN(num))
+      {
+        num = num.toString().split('').reverse().join('').replace(/(?=\d*\.?)(\d{3})/g,'$1.');
+        num = num.split('').reverse().join('').replace(/^[\.]/,'');
+        input.value = num;
+      }
+      else
+      { 
+        showMensaje('Solo se permiten numeros');
+        input.value = input.value.replace(/[^\d\.]*/g,'');
+      }
+    }
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------
+// formatea un numero según una mascara dada ej: "-$###,###,##0.00"
+//
+// elm   = elemento html <input> donde colocar el resultado
+// n     = numero a formatear
+// mask  = mascara ej: "-$###,###,##0.00"
+// force = formatea el numero aun si n es igual a 0
+//
+// La función devuelve el numero formateado
+//-----------------------------------------
+    function MASK( n, mask, format) 
+    {
+      if (sw_msg)console.log('*MASK*')
+      if (format == "undefined") format = false;
+      if (format || NUM(n)) 
+      {
+        dec = 0, point = 0;
+        x = mask.indexOf(".")+1;
+        if (x) { dec = mask.length - x; }
+
+        if (dec) 
+        {
+          n = NUM(n, dec)+"";
+          x = n.indexOf(".")+1;
+          if (x) { point = n.length - x; } else { n += "."; }
+        } 
+        else 
+        {
+          n = NUM(n, 0)+"";
+        } 
+        for (var x = point; x < dec ; x++) 
+        {
+          n += "0";
+        }
+        x = n.length, y = mask.length, XMASK = "";
+        while ( x || y ) 
+        {
+          if ( x ) 
+          {
+            while ( y && "#0.".indexOf(mask.charAt(y-1)) == -1 ) 
+            {
+              if ( n.charAt(x-1) != "-")
+                XMASK = mask.charAt(y-1) + XMASK;
+              y--;
+            }
+            XMASK = n.charAt(x-1) + XMASK, x--;
+          } 
+          else 
+            if ( y && "$0".indexOf(mask.charAt(y-1))+1 ) 
+            {
+              XMASK = mask.charAt(y-1) + XMASK;
+            }
+          if ( y ) { y-- }
+        }
+      } 
+      else 
+      {
+        XMASK="";
+      }
+      return XMASK;
+    }
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+// Convierte una cadena alfanumérica a numérica (incluyendo formulas aritméticas)
+//
+// s   = cadena a ser convertida a numérica
+// dec = numero de decimales a redondear
+//
+// La función devuelve el numero redondeado
+    function NUM(s, dec) 
+    {
+      if (sw_msg)console.log('*NUM*')
+      for (var s = s+"", num = "", x = 0 ; x < s.length ; x++) 
+      {
+        c = s.charAt(x);
+        if (".-+/*".indexOf(c)+1 || c != " " && !isNaN(c)) { num+=c; }
+      }
+      if (isNaN(num)) { num = eval(num); }
+      if (num == "")  { num=0; } else { num = parseFloat(num); }
+      if (dec != undefined) 
+      {
+        r=.5; if (num<0) r=-r;
+        e=Math.pow(10, (dec>0) ? dec : 0 );
+        return parseInt(num*e+r) / e;
+      } 
+      else 
+      {
+        return num;
+      }
+    }
+
+//-----------------------------------------------
+// Funcion para devolver una fecha formateada
+//-----------------------------------------------
+    function fecha(xfecha,xdias,xformato)
+    {
+      if (sw_msg)console.log('*fecha*')
+      if (xfecha=='') return xfecha
+      var f = (xfecha === undefined ? new Date() : typeof xfecha=='string' ? new Date (xfecha.replace('-',',')) : xfecha);
+      var d = (xdias === undefined ? 0 : Number.parseInt(xdias,10)) //+ (typeof xfecha=='string' ? 1 : 0) ) * 1000*60*60*24;
+      var xf= (xformato == undefined ? 'dmy' : xformato)
+      const nuevaFecha = new Date(f.setDate(f.getDate() + d));
+      var dia  = "0" + String(nuevaFecha.getDate() + d);
+      var mes  = "0" + String(nuevaFecha.getMonth() + 1);
+      var anio = nuevaFecha.getFullYear();
+      let yfecha = ''
+      switch (xf)
+      {
+        case 'ymd':
+          yfecha = anio + "/" +(mes.length==3 ? mes.slice(1,3) : mes.slice(0,2)) + "/"  + (dia.length==3 ? dia.slice(1,3) : dia.slice(0,2));
+          break
+        case 'ym':
+          yfecha = anio + "-" +(mes.length==3 ? mes.slice(1,3) : mes.slice(0,2));
+          break
+        case 'dmy':
+          yfecha = (dia.length==3 ? dia.slice(1,3) : dia.slice(0,2)) + "/" +(mes.length==3 ? mes.slice(1,3) : mes.slice(0,2)) + "/"  + anio;
+          break
+        case 'd':
+          yfecha = (dia.length==3 ? dia.slice(1,3) : dia.slice(0,2));
+          break
+        case 'm':
+          yfecha = (mes.length==3 ? mes.slice(1,3) : mes.slice(0,2));
+          break
+        case 'y':
+          yfecha = anio;
+          break
+        case 'dm':
+          yfecha = (dia.length==3 ? dia.slice(1,3) : dia.slice(0,2))  + "/" + (mes.length==3 ? mes.slice(1,3) : mes.slice(0,2)) ;
+          break
+        case 'md':
+          yfecha = (mes.length==3 ? mes.slice(1,3) : mes.slice(0,2)) + "/" + (dia.length==3 ? dia.slice(1,3) : dia.slice(0,2)) ;
+          break
+        case 'mdy':
+          yfecha = (mes.length==3 ? mes.slice(1,3) : mes.slice(0,2)) + "/" + (dia.length==3 ? dia.slice(1,3) : dia.slice(0,2))  + "/" + anio;
+          break
+        default:
+//          yfecha = (dia.length==3 ? dia.slice(1,3) : dia.slice(0,2)) + "/" + (mes.length==3 ? mes.slice(1,3) : mes.slice(0,2))  + "/" + anio;
+          yfecha = anio + "-" +(mes.length==3 ? mes.slice(1,3) : mes.slice(0,2)) + "-"  + (dia.length==3 ? dia.slice(1,3) : dia.slice(0,2));  // formato bootstrap5
+          break
+      }
+      return yfecha;
+    }
+
+//------------------------------------------------------------------
+// Funcion para retornar fecha cuando se envia varios argumentos
+//------------------------------------------------------------------
+    function fecha_y(...args)
+    {
+      if (sw_msg)console.log('*fecha_y*')
+      var narg=0
+      var o='y'
+      var f=new Date()
+      for (let arg of args)
+      {
+        narg++
+        if (narg==1) var o =arg;
+        if (narg==2) var f =arg;
+      } 
+      switch (o)
+      {
+        case 'y':
+          var yfecha = f.getFullYear();
+          break
+        case 'm':
+          var yfecha = f.getMonth() + 1;
+          break
+        case 'd':
+          var yfecha = f.getDate();
+          break
+      }
+      return yfecha;
+    }
+//-----------------------------------------------------------------------------------------------------------------------------------------
+//////////////////////////////////////////
+////  Grafico con la libreria CharJs  ////
+//////////////////////////////////////////
+function grafico_lui(gdata,gtipo,gtit_eje,gtitulo)
+{
+  if (sw_msg)console.log('*grafico_lui*')
+  const ydata = gdata
+  // agrupar los valores por columna nombre y los suma
+  const subtotals = Object.values(
+  ydata.reduce((acum, current) => {
+    // agrupando por col2
+    if (!acum[current.xcpo]) {
+      acum[current.xcpo] = {
+        x: current.xcpo,
+        y: 0
+      };
+    }
+    acum[current.xcpo].y += parseFloat(current.kgs_proc);
+    return acum;
+  }, {})
+  );
+  //console.table(subtotals)
+
+  //extrar los datos de y de subtotals
+  const data = subtotals.map(obj => obj.y);
+
+  //Calculo de items para la linea de tendencia
+  const x = [];
+  for (let i = 0; i < data.length; i++) {
+    x.push(i);
+  }
+
+  const y = data;
+
+  const n = x.length;
+  const sumX = x.reduce((sum, value) => sum + value, 0);
+  const sumY = y.reduce((sum, value) => sum + value, 0);
+  const sumXY = x.reduce((sum, xValue, index) => sum + xValue * y[index], 0);
+  const sumSquaredX = x.reduce((sum, value) => sum + value * value, 0);
+
+  const slope = (n * sumXY - sumX * sumY) / (n * sumSquaredX - sumX * sumX);
+  const yIntercept = (sumY - slope * sumX) / n;
+
+  const trendLine = x => slope * x + yIntercept;
+
+  var ctx = document.getElementById('myChart').getContext('2d');
+
+  var canvas = document.getElementById('myChart')
+  canvas.width = canvas.width;
+  canvas.height= canvas.height*0.75;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);  //borrar canvas
+
+  var chart = new Chart(ctx, 
+  {
+      type: 'line',
+      data: {
+          labels: subtotals.map(obj => obj.x),
+          datasets: [
+            {
+              label: gtit_eje,
+              data: y,
+              backgroundColor: 'rgba(54, 162, 235, 0.2)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1,
+              type: gtipo
+          },
+          {
+              label: 'Línea de tendencia',
+              data: x.map(trendLine),
+              backgroundColor: 'rgba(255, 99, 132, 0.2)',
+              borderColor: 'rgba(255, 99, 132, 1)',
+              borderWidth: 1
+          },
+
+          ]
+      },
+//1
+      options: {
+          scales: {
+            yAxes: [{
+            ticks: {
+              beginAtZero: true
+              }
+            }]
+          },
+          title: {
+            display: true,
+            text: gtitulo,
+            fontSize: 16,
+            fontColor: '#002c6f',
+            position: 'top'
+          },
+          plugins: {
+            tooltip: {
+              enabled: true
+            }
+          },
+          tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                var value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                return value;
+              }
+            }
+        },
+        scales: {
+          yAxes: [{
+            gridLines: {
+              drawBorder: false,
+              display: false
+            },
+            ticks: {
+              display: false,
+              beginAtZero: true,
+            }
+          }],
+
+          xAxes: [{
+            gridLines: {
+              drawBorder: false,
+              display: false
+            }
+          }]
+        }
+      }
+  });
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+//////////////////////////////////////////////////
+////  Grafico Apilado con la libreria CharJs  ////
+//////////////////////////////////////////////////
+function grafico_lui2(gdata,gtipo,gtit_eje,gtitulo)
+{
+  if (sw_msg)console.log('*grafico_lui2*')
+
+  var ctx = document.getElementById('myChart').getContext('2d');
+
+////  var canvas = document.getElementById('myChart')
+////  canvas.width = canvas.width;
+////  canvas.height= 80;
+///////////////////////////////  ctx.clearRect(0, 0, canvas.width, canvas.height*0.85);  //borrar canvas
+
+////  const newCanvas = document.createElement("canvas");
+////  newCanvas.id = "myCanvas";
+////  newCanvas.width = newCanvas.width;
+////  newCanvas.height = newCanvas.height;
+////  document.body.appendChild(newCanvas);
+////  var ctx = document.getElementById("myCanvas").getContext("2d");
+////
+  const labels = Object.keys(
+      gdata.reduce((obj, label) => (obj[label.Grupo] = true, obj), {})
+  );
+
+  const colors = {
+      "0": "#F0B27A",
+      "1": "#F7DC6F",
+      "2": "#7DCEA0",
+      "3": "#73C6B6",
+      "4": "#76D7C4",
+      "5": "#85C1E9",
+      "6": "#7FB3D5",
+      "7": "#BB8FCE"
+  };
+
+  const datasetsObject = gdata.reduce((obj, item) => {
+      obj[item.Subgrupo] = obj[item.Subgrupo] || {};
+      obj[item.Subgrupo][item.Grupo] = item.Valor;
+      return obj;
+  }, {});
+
+  let max = 0;
+  for (const key in datasetsObject) {
+    max++;
+  }
+
+  const datasets = Object.keys(datasetsObject).map(name => ({
+      label: name,
+      backgroundColor: asignaColor(name,max), //backgroundColor: colors[name],  //
+      data: labels.map(lin => datasetsObject[name][lin] || 0)
+  }));
+
+  const myBarChart = new Chart(ctx, {
+      type: gtipo,
+      data: { labels, datasets },
+      options: {
+          scales: {
+              xAxes: [{ stacked: true }],
+              yAxes: [{ stacked: true }],
+              yAxes: [{
+                ticks: {
+                  beginAtZero: true,
+                  callback: function(value, index, values) {
+                    return '$' + value.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                  }
+                }
+              }]
+              ,y: {
+                    ticks: {
+                      callback: function(value, index, values) {
+                        return value.toLocaleString('es-US', {minimumFractionDigits: 2});
+                      }
+                    }
+              }
+          },
+          title: {
+            display: true,
+            text: gtitulo,
+            fontSize: 16,
+            fontColor: '#002c6f',
+            position: 'top'
+          },
+          interaction: {
+            intersect: false,
+            mode: 'index',
+          },
+          plugins: {
+            tooltip: {
+              enabled: true,
+              position: 'nearest',
+            }
+          }
+      }
+  });
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+/////////////////////////////////////////////////
+//  Funcion para hacer una pausa en un proceso
+/////////////////////////////////////////////////
+function sleep(ms) {
+  if (sw_msg)console.log('*sleep*')
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+/////////////////////////////////////////////
+//  Funcion para Agrupar x Grupo y Subgrupo un obj
+/////////////////////////////////////////////
+function groupAndSum(datos) {
+  if (sw_msg)console.log('*groupAndSum*')
+  const groupedData = {};
+  datos.forEach((item) => {
+    const key = item.Grupo + item.Subgrupo;
+    if (!groupedData[key]) {
+      groupedData[key] = [];
+    }
+    groupedData[key].push(item);
+  });
+  
+  const result = [];
+  for (const key in groupedData) {
+    const group = groupedData[key];
+    const sum = group.reduce((sum, item) => sum + parseFloat(item.Valor), 0);
+    result.push({
+      Grupo: group[0].Grupo,
+      Subgrupo: group[0].Subgrupo,
+      Valor: sum
+    });
+  }
+   return result;
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+/////////////////////////////////////////////
+/// Asigna color a las barras en grafico  ///
+/////////////////////////////////////////////
+function asignaColor(obj,max) {
+  if (sw_msg)console.log('*asignaColor*')
+  let valor = obj * (obj<'4' ? obj : max - obj);
+  let red = (250-(valor*15));
+  let green = (100+(valor*10));
+  let blue = (180-(valor*5));
+//console.log(red,green,blue)
+  let color = `rgba(${red}, ${green}, ${blue}, 0.3)`;
+  return color;
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+/////////////////////////////////////////////////////////
+/// asigna valor de un campo a otro en un formulario  ///
+/// usar en Dropmenu o Droplist                       /// 
+/////////////////////////////////////////////////////////
+//resultados[0].descripcion
+function asignaValor(xid,xsubcadena,xcampo)
+{
+  if (sw_msg) console.log('*asignaValor*')
+  if (typeof xcampo == 'undefined') xcampo=xid
+  if (typeof xsubcadena == 'undefined' || xsubcadena == null) return
+  const selectElement = document.getElementById(xid);
+
+  if (selectElement instanceof HTMLSelectElement) 
+  {
+    let nro_op=selectElement.options.length
+    if (xsubcadena=='')
+    {
+      for(var i = 0; i < nro_op; i++) {
+        selectElement.options[0].remove()
+      }
+    }
+    else
+      for(var i = 0; i < nro_op; i++) {
+        if(selectElement.options[i].text.indexOf(xsubcadena.trim()) !== -1) {
+          selectElement.selectedIndex = i;
+          break;
+        }
+      }
+  }
+  else
+  {
+    if (selectElement instanceof HTMLSpanElement) 
+    {
+      if (typeof xsubcadena == 'string')
+        document.getElementById(xid).setAttribute('data-datal',JSON.stringify({[xcampo] : xsubcadena}))
+      else
+        document.getElementById(xid).setAttribute('data-datal',JSON.stringify(xsubcadena))
+    }
+    else
+    {
+      if (xsubcadena || xsubcadena=='')
+      {
+        document.getElementById(xcampo).value=xsubcadena
+        if ("datal" in document.getElementById(xcampo).dataset) 
+        {
+          document.getElementById(xcampo).dataset.datal=xsubcadena.replace(/\$|,/g, "")
+        }
+      }
+      else
+        document.getElementById(xcampo).dataset.datal=JSON.stringify(xsubcadena)
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+/////////////////////////////////////////////////////////////////////////////
+/// Funcion para sacar datos de la propiedad datal de los campos dropdown ///
+/////////////////////////////////////////////////////////////////////////////
+function retornaDatal(id,xpropiedad)
+{
+if (sw_msg)console.log('*retornaDatal*')
+const input = document.getElementById(id);
+
+  // verificar si el elemento es de tipo Select    // para input  HTMLInputElement
+if (input instanceof HTMLSelectElement) {
+////if (sw_msg)console.log('*retornaDatal-input*')
+  if (input.value =='') return ''
+  var selectedIndex = input.selectedIndex;
+  var selectedOption = input.options[selectedIndex];
+  var datalValue = selectedOption.getAttribute("datal");
+  var datalObject = JSON.parse(datalValue);
+//if (sw_msg) console.error(eval(` datalObject.${xpropiedad} `))
+  // Leer el valor de la propiedad "codsucursal"
+  const valorPropiedad = eval(` datalObject.${xpropiedad} `);
+  //  alert(datalSeleccionado)
+  return typeof valorPropiedad == 'undefined' ? '' : valorPropiedad
+}
+else
+{
+////if (sw_msg)console.log('*retornaDatal-select*')
+  if (input instanceof HTMLSpanElement)
+  {
+    // Convertir la cadena JSON en un objeto JavaScript
+////    const dataObject = JSON.parse(dataDatalValue);
+    const dataObject = JSON.parse(input.getAttribute('data-datal'));
+    return eval(`dataObject[0].${xpropiedad}`);
+  }
+  else
+  {
+    if (xpropiedad)
+    {
+      var seleccionado = input.value;
+      var options = input.list.options;
+      for (var i = 0; i < options.length; i++) {
+        if (options[i].value === seleccionado) {
+          dataL     = options[i].getAttribute("datal");
+          dataLL    = options[i].getAttribute(`datal${id}`);
+    //      var cpo1  = options[i].getAttribute("cpo1");
+    //      var cpo2  = options[i].getAttribute("cpo2");
+        }
+      }
+      return typeof dataL == 'undefined' ? input.value : eval(`JSON.parse(dataLL).${xpropiedad}`)
+    }
+    return (input.type == 'checkbox') ? input.checked : input.value;
+  }
+}
+}
+//////////////////////////////////////////////////////
+// Eliminar comillas de campo que son de tipo numero
+//////////////////////////////////////////////////////
+function removeCommasWithRightAlign(data, xcampos) {
+  let regex = new RegExp(['cellClick: handleCellDblClick,','cellClick: handleCellClick,'].join("|"), "gi");  // 'g' para reemplazo global, 'i' para no diferenciar mayúsculas/minúsculas
+
+  // Reemplazar todas las ocurrencias de la palabra con una cadena vacía
+  let campos = xcampos.replace(regex, "");
+  return data.map(record => {
+    // Extract field names with "hozAlign": "right" from xcampos
+    const fieldsToUpdate = eval(campos)
+      .filter(fieldDef => fieldDef.hozAlign === 'right' || fieldDef.hozAlign === 'center')
+      .map(fieldDef => fieldDef.field);
+
+    for (const field of fieldsToUpdate) {
+      if (record.hasOwnProperty(field)) { // Check if field exists in record
+        const valueStr = record[field].toString();
+        const newValue = valueStr.replace(/,/g, '');
+        record[field] = parseFloat(newValue);
+      }
+    }
+    return record;
+  });
+}
+
+function formatMoney(value) {
+  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(value);
+}
+
+////////////////////////////////////////////////////
+// Funcion tabla generica  con tabulator
+////////////////////////////////////////////////////
+function ttable(xtipo,xmodal,xdata,xtitu,campos,xgrupo,xfunc,xsize,xfuncColor,xalto)
+{
+  if (sw_msg) console.error('*ttable*')
+  if (Object.keys(xdata).length === 0) 
+  {
+    espera.style.display='none'
+    return
+  }
+  if (xtipo=='H') xdata = removeCommasWithRightAlign(xdata, campos); // Call the function with data and xcampos  /// en revision
+
+  // Agrega una propiedad de ID única a cada objeto de datos
+  if (!xdata.hasOwnProperty('id')) {
+    xdata.forEach(function(item, index) {
+    item.id = index + 1; // Puedes usar cualquier valor único aquí
+  });
+  }
+  espera.style.display=''
+  xcampos   = campos == undefined ? {} : campos
+
+  if (typeof xfunc !== 'undefined')
+  {
+    if (typeof xfunc === 'object') 
+    {
+      var xfunc1=xfunc.click
+      var xcpo1 =xfunc.cpo1
+      var xfunc2=xfunc.dblclick
+      var xcpo2 =xfunc.cpo2
+    }
+    if (typeof xfunc === 'string') 
+    {
+      var xfunc1=`function zfunc1(reg) {}`
+      var xfunc2=xfunc
+    }
+  }
+
+  const regex = /\s+/g;
+  const ytitu = xtitu.replace(regex, "_") + '.XLSX';
+  //if (xtipo!='V') var ycampos = typeof xcampos == 'string' ? JSON.parse(xcampos) : xcampos
+  if (xtipo!='V') var ycampos = typeof xcampos == 'string' ? xcampos : xcampos
+  if (xfuncColor == undefined) xfuncColor=''
+  ///////
+  if (!xalto) var xalto='100%'
+
+  if (xmodal.substring(0, 1)!='#')
+  {
+    if (xsize)
+    {
+      showModal(xmodal,xtitu,1,xsize)
+    }
+    else
+    {
+      showModal(xmodal,xtitu,1)
+    }
+    if (myModal) myModal.remove();
+
+    var myModal = new bootstrap.Modal(document.getElementById(xmodal))  // Crea Ventana Modal
+    ///////
+    var zTab='#'+xmodal+'Body'
+  }
+  else
+  {
+    var zTab=xmodal
+  }
+
+  var correo=''
+  if (document.getElementById('xmail')) correo=document.getElementById('xmail').value.split('|').shift()
+
+  var correou=''
+  google.script.run.withSuccessHandler((mail)=>(correou=mail)).getEmail()
+  if (correo==='') correo=correou 
+////
+  function getEmailMenu(row,table)
+  {
+    if (sw_msg)console.log('*getEmailMenu*')
+    var selectElement = document.getElementById('xmail');
+    var options = selectElement.getElementsByTagName('option');
+    var emails = [];
+
+    for (var i = 0; i < options.length; i++) {
+        var data = options[i].getAttribute('datal');
+        if (data) {
+            emails.push(JSON.parse(data));
+        }
+    }
+    var subMenu = emails.map(function(item) {
+      if (sw_msg)console.log('*emails.map*')
+      return {
+          label: item.correo,
+          action: function(e, row) {
+              mensajeCorreo(item.correo.trim(),table)
+          }
+      };
+    });
+    subMenu.push({
+        label: "<i class='fa fa-envelope'></i> "+correou,
+        action: function(e, row) {
+console.log('*/*/*/*/*/*/*/*/')
+console.log(table.getHeaderFilters().length)
+console.log(table.getSelectedRows().length)
+////            mensajeCorreo(correou.trim(),((table.getHeaderFilters().length > 0) ? ((table.getSelectedRows().length > 0) ? table.getSelectedData() : table.getData('active')) : (table.getSelectedRows().length > 0) ? table.getSelectedData() : table ))
+            mensajeCorreo(correou.trim(), table )
+        }
+    });
+    selectElement.innerHTML=''
+    return subMenu;
+  }
+
+  function mensajeCorreo(correo,table)
+  {
+    if (sw_msg)console.log('*mensajeCorreo*')
+    var regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (correo =='@' || correo=='' || !regex.test(correo))
+    {
+      correo=''
+      showMensaje('Verifique direccion de Correo')
+      return 
+    } 
+    var tablaHtml = table.getHtml();
+    var sender= titulo.textContent+' - AisaCloud'
+    var mail={
+      'to': correo,
+      'subject':'INFORME '+xtitu+' | '+formatDate(new Date(),'yyyy/mm/dd-hh:mi'),
+      'message': 'Este mensaje fue autogenerado desde AisaCloud.\n',
+      'nameSender': sender
+    }
+    var mensaje=` <!DOCTYPE html>
+    <html lang="es">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>.</title>
+    <style>
+      body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+      }
+      .header-img {
+          max-width: 250px;
+          display: block;
+          margin: 0 auto;
+      }
+      .table-container {
+          margin: 20px auto;
+          width: 80%;
+      }
+      table {
+          border-collapse: collapse;
+          width: 100%;
+      }
+      th, td {
+          border: 1pt solid grey;
+          padding: 0.5em;
+          text-align: center;
+      }
+      th {
+          background-color: #f2f2f2;
+      }
+      h2, h5 {
+          text-align: center;
+          margin: 0;
+      }
+    </style>
+    </head>
+    <body>
+    <a href="www.acerosindustriales.com">
+    <img src="https://lh3.google.com/d/1UBjwwfVYliVPYfa5Q1YaSpyyID8ZHTUc" class="rounded-top shadow" style="max-width: 200px;" alt="Aceros">
+    </a>
+    <h2><center><style="padding: 0rem; border: 0rem; margin: 0rem;">${titulo.textContent.substring(8,50)}</center></h2>
+    <h4><center>`+xtitu+`</center></h4>
+    `+(xtitu.toUpperCase().indexOf('CARTERA')>-1 ? '<h3>Cordial saludo.<br><br>¡Esperamos que te encuentres muy bien! Este es tu estado de cuenta más reciente con nosotros. Nos complace presentarte un resumen de tus transacciones y el estado de la misma.  No olvide diligenciar los 3 eventos en el Radian que por ley son Obligatorios.</h3><br>' : '<br>')+`
+    ${tablaHtml}
+    `+(xtitu.toUpperCase().indexOf('CARTERA')>-1 ? '<br><h3>Si tienes alguna pregunta o inquietud sobre tu cuenta, no dudes en contactarnos.<br><br>Agradecemos nos confirme oportunamente la programación de pagos y sus respectivos soportes al correo<br>Recuerde no somos autoretenedores.<br><br>Cordialmente,<br><br>Departamento de Cartera<br>'+titulo.textContent.substring(8,50)+'</h3>' : '<br>')+`
+    </body></html> ` 
+    mail.htmlBody=mensaje
+    google.script.run
+    .withFailureHandler(onFailure)
+    .withSuccessHandler(showMensaje('Correo Enviado'))
+    .SendMail3(mail);
+  }
+////
+  // menu contextual
+  // Menu contextual Click Derecho
+  var rowMenu2=function(e, component)
+  {
+          //component - column/cell/row component that triggered the menu
+          //e - click event object
+
+          var menu = [];
+
+          if (typeof component.getData=== 'function')
+          {
+            if(!component.getData().approved){
+                menu.push({
+                    label:"<i class='fa fa-check-square'></i> "+"Marcar",
+                    action:function(e, column){
+                        component.update({"approved":true});
+                        column.select();
+                    }
+                })
+            }else{
+                menu.push({
+                    label:"<i class='fa fa-square-o'></i> "+"desMarcar",
+                    action:function(e, column){
+                        component.update({"approved":false});
+                        column.deselect();
+                    }
+                })
+            }
+          }
+          menu.push(
+          {
+              separator:true,
+          },
+          {
+              label:"Admin Functions",
+              menu:[
+                  {
+                      label:"<i class='fas fa-trash'></i> Delete Row",
+                      action:function(e, row){
+                          row.delete();
+                      }
+                  },
+                  {
+                      label:"<i class='fas fa-ban'></i> Disabled Option",
+                      disabled:true,
+                  }
+              ]
+          },
+          {
+              label: !swg ? "+ Expandir" : "- Contraer",
+              action:function(e, row){
+                var groups = table.getGroups();
+                var campo=''
+                groups.forEach((group) => {
+                  var key = group.getKey();
+                  var field = group.getField();
+                  var children = group.getSubGroups();
+              //    if (sw_msg) console.log(key)
+              //    if (sw_msg) console.log(field)
+                  campo=field
+                });
+                if (swg)
+                  {
+                    table.setGroupStartOpen(false);
+                    swg=false
+                  }
+                  else
+                  {
+                    table.setGroupStartOpen(true);
+                    swg=true
+                  }
+                  table.setGroupBy("");
+                  table.setGroupBy(campo);
+              }
+          },
+          {
+              label: "<i class='fa fa-clipboard'></i> "+"Copiar",
+              action:function(e, row){
+
+              var columns = table.getColumns();
+              var rows = table.getRows();
+              var copiedText = xtitu + "\n";
+
+              // Obtener los títulos de las columnas
+              var columnTitles = columns.map(function(column) {
+                  return column.getField();
+              });
+
+              // Agregar los títulos de las columnas al texto copiado
+              copiedText += columnTitles.join("\t") + "\n";
+   //console.log(rows)                
+
+              rows.forEach(function(row) {
+   //                if (row.isVisible()) {
+                  var rowData = row.getData();
+                  var rowText = columnTitles.map(function(title) {
+                      return rowData[title];
+                  }).join("\t");
+                  copiedText += rowText + "\n";
+   //                }
+              });   
+              // Copiar al portapapeles
+              navigator.clipboard.writeText(copiedText)
+                  .then(function() {
+                      showMensaje("Texto copiado al portapapeles");
+                  })
+                  .catch(function(error) {
+                      showMensaje("Error al copiar al portapapeles:", error);
+                  });
+
+   //table.copyToClipboard('active');
+              }
+          },
+          {
+              separator:true,
+          },
+          {
+              label:"<i class='fab fa-wordpress-simple'></i> "+"Palabras",
+              action: function(e, cell) {
+                Grafico_Palabras(xdata)
+              }
+          },
+          {
+              separator:true,
+          },
+          {
+              label:"<i class='fa fa-search-plus'></i> "+"Buscar",
+              action:function(e, row){
+                var searchTerm = prompt('Ingrese el término de búsqueda:');
+                if (searchTerm !== null && searchTerm.trim() !== '') 
+                {
+                  // Realizar la búsqueda en todas las columnas
+                  table.setFilter(function(data) {
+                    var match = false;
+                    // Iterar sobre cada columna de la fila
+                    for (var key in data) 
+                    {
+                      if (data.hasOwnProperty(key)) {
+                        var value = data[key];
+                        // Verificar si el valor de la columna coincide con el término de búsqueda
+                        if (value && value.toString().toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
+                          match = true;
+                          break;
+                        }
+                      }
+                    }
+                    return match;
+                  });
+                } else {
+                  // Si no se ingresó un término de búsqueda, limpiar los filtros de la tabla
+                  table.clearFilter();
+                }
+              }
+          },
+          {
+              label:"<i class='fa fa-plus-square'></i> "+"Sumatoria",
+              action:function(e, row){
+                const sumaPropiedadesNumericas = table.getData(true).reduce((suma, obj) => {
+                  for (const propiedad in obj) {
+                    const valor = parseFloat(obj[propiedad]);
+                    if (!isNaN(valor)) {
+                      suma[propiedad] = (suma[propiedad] || 0) + valor;
+                    }
+                  }
+                  return suma;
+                }, {});
+
+                // Muestra los resultados
+   //if (sw_msg) console.table(sumaPropiedadesNumericas)
+                const resultadosNumericos = {};
+                const resultadosNoNumericos = {};
+
+                for (const registro of table.getData(true)) {
+                  for (const propiedad in registro) {
+                    if (isNaN(registro[propiedad])) {
+                      if (resultadosNoNumericos[propiedad]) {
+                        resultadosNoNumericos[propiedad]++;
+                      } else {
+                        resultadosNoNumericos[propiedad] = 1;
+                      }
+                    } else {
+                      if (resultadosNumericos[propiedad]) {
+                        resultadosNumericos[propiedad] += Number(registro[propiedad]);
+                      } else {
+                        resultadosNumericos[propiedad] = Number(registro[propiedad]);
+                      }
+                    }
+                  }
+                }
+                const totales = Object.assign({}, resultadosNoNumericos, resultadosNumericos);
+
+   //if (sw_msg) console.table(totales)
+                table.addRow(totales,false);
+                var rows = table.getRows(); // Obtener arreglo de todas las filas
+                var lastRow = rows[rows.length -1]; // Acceder a la última fila
+                lastRow.getElement().style.backgroundColor = 'rgb(30, 114, 170)'; // Cambiar color de fondo
+                lastRow.getElement().style.color = 'white'; // Cambiar color de fondo
+              }
+          },
+          {
+              label:"<i class='fa fa-hourglass-start'></i> "+"Promedio",
+              action:function(e, row){
+
+              const promediarPropiedadesNumericas = table.getData(true).reduce((suma, obj) => {
+                for (const propiedad in obj) {
+                  const valor = parseFloat(obj[propiedad]);
+                  if (!isNaN(valor)) {
+                    suma[propiedad] = (suma[propiedad] || 0) + valor;
+                  }
+                }
+                return suma;
+              }, {});
+
+              const conteoPropiedadesNumericas = {};
+              const conteoPropiedadesNoNumericas = {};
+
+              for (const registro of table.getData(true)) {
+                for (const propiedad in registro) {
+                  if (isNaN(registro[propiedad])) {
+                    if (conteoPropiedadesNoNumericas[propiedad]) {
+                      conteoPropiedadesNoNumericas[propiedad]++;
+                    } else {
+                      conteoPropiedadesNoNumericas[propiedad] = 1;
+                    }
+                  } else {
+                    if (conteoPropiedadesNumericas[propiedad]) {
+                      conteoPropiedadesNumericas[propiedad]++;
+                    } else {
+                      conteoPropiedadesNumericas[propiedad] = 1;
+                    }
+                  }
+                }
+              }
+
+              const promedios = {};
+
+              for (const propiedad in promediarPropiedadesNumericas) {
+                const suma = promediarPropiedadesNumericas[propiedad];
+                const conteo = conteoPropiedadesNumericas[propiedad];
+                promedios[propiedad] = (suma / conteo).toFixed(2); //redondear a 2 decimales
+              }
+
+              const totales = Object.assign({}, conteoPropiedadesNoNumericas, promedios);
+
+   //if (sw_msg) console.table(totales)
+              table.addRow(totales);
+                var rows = table.getRows(); // Obtener arreglo de todas las filas
+                var lastRow = rows[rows.length -1]; // Acceder a la última fila
+                lastRow.getElement().style.backgroundColor = 'rgb(30, 114, 190)'; // Cambiar color de fondo
+                lastRow.getElement().style.color = 'white'; // Cambiar color de fondo
+            }
+          },
+          {
+              label:"<i class='fa fa-file'></i> "+"Descargar .XLS",
+              action:function(e, row){
+                table.download("xlsx", ytitu, {sheetName:"AisaCloud", bom:true}, ((table.getHeaderFilters().length > 0) ? (table.getSelectedRows().length > 0) ? "selected" : "active" : "all" ));
+              }
+          },
+          {
+              label:"<i class='fa fa-print'></i> "+"Imprimir",
+              action:function(e, row){
+                //  var tablaHtml = table.element.outerHTML;
+                var tablaHtml = table.getHtml();
+                // Crear un iframe para imprimir la tabla
+                var printFrame = document.createElement("iframe");
+                printFrame.style.display = "none";
+                document.body.appendChild(printFrame);
+                // Escribir el contenido HTML de la tabla en el iframe
+                var ventana = printFrame.contentWindow.document;
+                ventana.open();
+                // ventana.write(`<html><head><title>${xtitu}</title></head><body>`);
+                ventana.write(`<html><head><title>.</title>`);
+                ventana.write('<style>');
+                ventana.write('table {border-collapse: collapse; width: 100%;}');
+                ventana.write('table, th, td {border: 1pt solid grey; font-size: 7pt;}');
+                // ventana.write('th, td {padding: 0.5em; text-align: left;}');
+                ventana.write('th, td {padding: 0.2em; }');
+                ventana.write('</style>');
+                ventana.write('</head><body>');
+                ventana.write(`<h2><center><style="padding: 0rem; border: 0rem; margin: 0rem;">${titulo.textContent}</center></h2>`)
+                ventana.write(`<h5><center>${xtitu}</center></h5>`)
+                ventana.write(tablaHtml);
+                ventana.write('</body></html>');
+                ventana.close();
+                // Imprimir el contenido del iframe
+                printFrame.contentWindow.focus();
+                printFrame.contentWindow.print();
+              }
+          },
+          {
+                label: "<i class='fa fa-envelope'></i> "+"Enviar Correo",
+                menu: getEmailMenu(component,table),
+          },
+          {
+              label:"<i class='fa fa-search'></i>"+" Todos",
+              action:function(e, row){
+                  table.clearFilter();
+              }
+          },
+          {
+              label:'<i class="fa fa-user" aria-hidden="true"></i>'+" Cliente",
+              action:function(e, row){
+                  // Obtén todos los modales abiertos
+                // Obtén todos los elementos con la clase modal-backdrop fade show
+                var elementos = document.querySelectorAll('.modal-content');
+
+                // Itera a través de los elementos y elimínalos
+                elementos.forEach(function(elemento) {
+                    elemento.parentNode.removeChild(elemento);
+                });
+                // Obtén todos los elementos con la clase modal-backdrop fade show
+                var elementos = document.querySelectorAll('.modal-backdrop.fade.show');
+
+                // Itera a través de los elementos y elimínalos
+                elementos.forEach(function(elemento) {
+                    elemento.parentNode.removeChild(elemento);
+                });
+                // Obtén todos los elementos con la clase modal-backdrop fade show
+                var elementos = document.querySelectorAll('.modal-dialog');
+
+                // Itera a través de los elementos y elimínalos
+                elementos.forEach(function(elemento) {
+                    elemento.parentNode.removeChild(elemento);
+                });
+                // Obtén todos los elementos con la clase modal-backdrop fade show
+                var elementos = document.querySelectorAll('.modal.fade.ui-draggable');
+
+                // Itera a través de los elementos y elimínalos
+                elementos.forEach(function(elemento) {
+                    elemento.parentNode.removeChild(elemento);
+                });
+                xcliente.focus()
+              }
+          },
+          {
+              label:'<i class="fa fa-rocket" aria-hidden="true"></i>'+" Analizar",
+              action:function(e, row){
+                espera.style.display=''
+//----
+                var copiedText = xtitu + "\n";
+
+                // Obtener los títulos de las columnas
+                var columns = table.getColumns();
+                var columnTitles = columns.map(function(column) {
+                    return column.getField();
+                });
+
+                // Agregar los títulos de las columnas al texto copiado
+                copiedText += columnTitles.join("\t") + "\n";
+
+                var rows = table.getRows();
+                rows.forEach(function(row) {
+                    var rowData = row.getData();
+                    var rowText = columnTitles.map(function(title) {
+                        return rowData[title];
+                    }).join("\t");
+                    copiedText += rowText + "\n";
+                })
+//----
+                google.script.run
+                .withSuccessHandler((rta)=>{
+                  if (rta=={}) 
+                  {
+                    showMensaje('Error al procesar respuesta')
+                    espera.style.display='none'
+                    return
+                  }
+                  rtaj=JSON.parse(rta).candidates[0].content.parts[0].text
+                  var idmodal='Gemini'
+                  showModal(idmodal,'Analisis de Informacion',0)
+                  var myModal = new bootstrap.Modal(document.getElementById(idmodal))  // Crea Ventana Modal
+                  const html=`  <div class="mb-3">
+                                <label for="exampleFormControlInput1" class="form-label">Pregunta</label>
+                                <input type="text" class="form-control" id="xpregunta" placeholder="...">
+                                <button id='xbtnpregunta' onclick="enviarMensaje()">Enviar</button>
+                                </div>
+                                <div class="mb-3">
+                                  <label for="exampleFormControlTextarea1" class="form-label">Detalle Explicacion</label>
+                                  <textarea class="form-control" id="xexplica" rows="20" readonly>${rtaj}</textarea>
+                                </div> `
+                  document.getElementById(idmodal+'Body').insertAdjacentHTML('beforeend',html);
+                  myModal.show()
+                  espera.style.display='none'
+                })
+                .gemini('actua como un experto en analisis de ventas y con base en la informacion suministrada, proporciona una analisis gerencial de estos datos que tiene por titulo :'+xtitu+' / '+copiedText)
+              }
+          }
+          )
+          return menu;
+      }
+      // fin menu contextual
+
+
+  var sumFormatter = function(cell, formatterParams, onRendered){
+    return cell.getColumn().getDefinition().title + ": " + cell.getRows().length;
+  };
+
+  // crea ventana y/o verifica si existe
+//  yTab='#'+xdomTab
+////  var xtab=document.getElementById(xdomTab)
+  var xtab=document.getElementById(zTab)
+  // obtener las campos de un objeto
+  var filas0 = Object.keys(xdata[0]).map(function(key) {
+      return { property: key, value: xdata[0][key] };
+  });
+
+  // ordenar las filas alfabeticamente para la vista vertical
+  filas0.sort((a, b) => {
+      if (a.property < b.property) {
+          return -1;
+      }
+      if (a.property > b.property) {
+          return 1;
+      }
+      return 0;
+  });
+  
+  // si existe la tabla removerla
+ if (xtab) xtab.remove();
+
+  // para el caso de las tablas verticales
+  if (xtipo=='V')
+  {
+    var xestruc=`
+      var table = new Tabulator(zTab, {
+      data: filas0 ,
+      columns: [
+            { title: "Propiedad", field: "property" },
+            { title: "Valor", field: "value" }
+      ],
+      placeholder: "No Hay Datos",
+      maxHeight: '${xalto}',
+      layout: "fitColumns",
+//      responsiveLayout: 'collapse',
+      rowContextMenu: rowMenu2,
+      groupContextMenu: rowMenu2,
+      groupToggleElement: "header",
+      frozenRows: 0,
+      movableColumns: true,
+      footerElement: lineasT(filas0),
+      rowClick: function (e, row) {
+        // Desactivar cualquier selección existente antes de seleccionar la nueva fila
+        table.deselectRow();
+        // Seleccionar la fila en la que se hizo clic
+        row.select();
+      },
+      rowFormatter: function (row) {
+//        var rowData = row.getData();
+        var rowData = row;
+        `+xfuncColor+`(rowData)
+      }     
+    });
+    `
+  }
+  else
+  {
+    ygrupo= (xgrupo == undefined || xgrupo == '') ? '' : ', groupBy:'+xgrupo
+    xfunc=xfunc == undefined || xfunc=='' ? 'console.log' :  xfunc
+    var xestruc=`
+      var table = new Tabulator(zTab, {
+      data: xdata,
+      columns: eval(ycampos),
+      placeholder: "No Hay Datos",
+      maxHeight: '${xalto}',
+      layout: "fitColumns",
+//      responsiveLayout: 'collapse',
+      rowContextMenu: rowMenu2,
+      groupContextMenu: rowMenu2,
+      groupToggleElement: "header",
+      frozenRows: 0,
+      movableColumns: true,
+      footerElement: lineasT(xdata),
+      rowMouseEnter: function(row) {
+       row.getElement().addClass("hover"); //agregar la clase "hover" al elemento de fila cuando el mouse entra
+      },
+      rowMouseLeave: function(row) {
+        row.getElement().removeClass("hover"); //eliminar la clase "hover" del elemento de fila cuando el mouse sale
+      },
+      rowClick: function (e, row) {
+        // Desactivar cualquier selección existente antes de seleccionar la nueva fila
+        table.deselectRow();
+        // Seleccionar la fila en la que se hizo clic
+        row.select();
+      },
+      rowSelected: function(row) {
+        // Cuando una fila se selecciona, aquí puedes realizar acciones adicionales si es necesario
+        console.log("Fila seleccionada:", row.getData());
+      },
+      rowFormatter: function (row) {
+//        var rowData = row.getData();
+        var rowData = row;
+        ` + xfuncColor + `(rowData)
+      }
+      ` + ygrupo + `
+    });
+
+//    table.getElement().addEventListener("contextmenu", function(e) {
+//      e.preventDefault(); 
+//      var posX = e.clientX;
+//      var posY = e.clientY;
+//      table.getRowFromPosition(posX, posY).then(function(row) {
+//        table.getRowContextMenu().show(posX, posY);
+//      });
+//    });
+
+    // Funcion click sobre la fila
+    table.on("rowClick", function(e, row){
+//      console.log(row)
+//      obj=row._row.data
+//      console.log(obj)
+      table.deselectRow();
+      row.select();
+    });
+
+    // Funcion dobleclick sobre la fila
+    table.on("rowDblClick", function(e, row){
+      //e - the click event object
+      //row - row component
+      if (typeof xfunc2 == undefined || xfunc2 =='') return
+//      console.log(row)
+      obj=row._row.data
+//      console.log(obj)
+      seleccionarFila(row._row.position)
+      ` + xfunc2+`(obj)  
+    });
+
+    // Función de manejo de doble clic en la celda 
+    function handleCellDblClick(e, cell) {
+      if (typeof xfunc1 == undefined || xfunc1 =='') return
+      obj=cell.getData()
+      `+xfunc1+`(obj)
+    }
+
+    // Función de manejo de clic en la celda 
+    function handleCellClick(e, cell) {
+      obj=cell.getData()
+      var campo_ = cell.getField();
+//      var campo1_= obj[0].${campo_}
+//alert(campo_ + ' / ' + xcpo1 + ' / ' + xfunc1)
+//console.log(obj)
+//console.log (e)
+//console.log(cell)
+//console.log (cell._cell.row.data.codigo)
+//console.log (campo_)
+//Revisar para tener 2 o mas campos de drilldown
+      var vlr_   = cell.getValue();
+//      (xcpo1 == undefined) ? `+xfunc1+`(obj , campo_) : `+xfunc1+`((obj.${xcpo1})==undefined ? campo1_ : obj.${xcpo1} , xcpo1.toLowerCase())
+      `+xfunc1+`(obj , campo_)`+`
+    }
+
+    // funcion para seleccionar fila
+    function seleccionarFila(filaId) {
+      table.selectRow(filaId);
+    }
+    `
+  }
+////if (sw_msg) console.log(xestruc)
+  eval(xestruc)
+  if (xmodal.substring(0, 1)!='#') myModal.show()
+  espera.style.display='none'
+////if(sw_msg) console.log(xestruc)
+}
+
+//-------------------------------------------
+// Funcion que genera Totales en las tablas
+//-------------------------------------------
+function lineasT(xcel)
+{
+  if (sw_msg)console.log('*lineasT*')
+  return "<span>Total de Lineas : "+xcel.length+"</span>"
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Funcion para sacar las propiedades de un objeto y convertirlas en estructura para TabulatorJs  ///
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+function xcamposObj(xdata,xancho)  //En revision
+{
+  
+if (sw_msg) console.log('*xcamposObj*')
+
+  const propiedades = Object.keys(xdata[0])
+  let i=0
+  const ycamposObj = propiedades.map(propiedad => {
+    return {
+      title: propiedad,
+      field: propiedad,
+      width: 100
+    }
+  });
+  if (sw_msg) console.log(ycamposObj)
+  return ycamposObj
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Funcion para sacar las propiedades de un objeto y convertirlas en estructura para TabulatorJs  ///
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+function xcampos2Obj(xdata,xancho)
+{
+if (sw_msg) console.log('*xcamposObj*')
+
+  const propiedades = Object.keys(xdata[0])
+  let nuevoObjeto = [];
+
+  for (let i = 0; i < propiedades.length; i++) {
+    nuevoObjeto.push({
+      "title": propiedades[i].toUpperCase(),
+      "field": propiedades[i],
+      "width": xancho[i]<=0 || xancho[i]==undefined ? 100 : xancho[i]
+    });
+  }
+  if (sw_msg)  console.log(nuevoObjeto);
+  return nuevoObjeto
+}
+
+////////////////////////////////////////////////
+// Coloca Zeros o un Caracter a la izquierda  //
+////////////////////////////////////////////////
+function zeros(xval,xcan,xcar)
+{
+  if (sw_msg)console.log('*zeros*')
+  var ystr=(xcar==undefined ? '0' : xcar).repeat(xcan) + xval
+  return ystr.substr(ystr.length-xcan,xcan)
+}
+
+//////////////////////////////
+// Acumulado por cada fila  //
+//////////////////////////////
+function acumrow(xdata,xcampo)
+{
+  if (sw_msg)console.log('*acumrow*')
+  let acumulado = 0;
+  xdata.forEach((row) => {
+    acumulado += parseInt(eval(`row.${xcampo}`));
+    row.acumulado = acumulado;
+  });
+  return xdata
+}
+
+function xcampos2Ve(xdata)
+{
+if (sw_msg) console.log('*xcampos2Ve*')  
+   var filteredData = [{title: "Propiedad", field: ""},{title: "Valor", field: ""}];
+        for(var key in xdata){
+            if(xdata.hasOwnProperty(key)){
+                filteredData.push({name:key, value:xdata[key]});
+            }
+        }
+if(sw_msg) console.log(filteredData)        
+        return filteredData;
+}
+/////////////////////////////////////////
+/// Formatear hora actual
+/////////////////////////////////////////
+function hora()
+{
+  if (sw_msg)console.log('*hora*')
+  var fec  = new Date()
+  var hora = fec.getHours();
+  var minu = fec.getMinutes();
+  var seg  = fec.getSeconds();
+  return `${hora<10 ? '0'+hora : hora}:${minu<10 ? '0'+minu : minu}:${seg<10 ? '0'+seg : seg}`;
+}
+/////////////////////////////////////////
+/// Formatear fecha y hora
+/////////////////////////////////////////
+function formatDate(date, format) 
+{
+  if (sw_msg)console.log('*formatDate*')
+  var minu= date.getMinutes();
+  if (minu < 10) minu = '0' + minu;
+  
+  var dia= date.getDate();
+  if (dia < 10) dia = '0' + dia
+
+  var mes= date.getMonth() + 1;
+  if (mes < 10) mes = '0' + mes
+  
+  const r = {
+    mm: mes,
+    dd: dia,
+    yyyy: date.getFullYear(),
+    yy: date.getFullYear().toString().slice(-2),
+    hh: date.getHours(),
+    mi: minu,
+    ss: date.getSeconds()
+  }
+  return format.replace(/hh|mi|ss|mm|dd|yyyy|yy/gi, matched => r[matched])
+}
+
+//---------------------------------------------------
+// Función para crear y mostrar una ventana modal
+//---------------------------------------------------
+function showModal(modalId, modalTitle, botones, modalsize) 
+{
+  if (sw_msg)console.log('*showModal*')
+  if (!modalsize) var modalsize='modal-fullscreen'  // modal-sm =300px '' =500px modal-lg =800px  modal-xl =1140px 
+  // Crear el HTML de la ventana modal
+  if (document.getElementById(modalId))
+  {
+    document.getElementById(modalId).remove();
+////    var ttit=document.getElementById(`${modalId}Label`)
+////    ttit.innerHTML=modalTitle
+
+////    var ttit=document.getElementById(`${modalId}Body`)
+////    ttit.innerHTML=''
+////    sw_1 = true // invierte el valor del sw_1 de primera vez
+////    return
+  }
+
+  var modalHTML = `
+    <div class="modal fade" id="${modalId}" aria-hidden="true" aria-labelledby="${modalId}Label" tabindex="-1">
+      <div class="modal-dialog resizable ${modalsize} modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content shadow p-2 mt-0.1 mb-0.1 bg-body rounded" style="background-color: ${retornaDatal('ysucursal','empresa') == '01' ? 'rgb(0, 44, 111)' : 'rgb(4, 100, 60)'}
+; padding:0;">
+          <div class="modal-header" id="${modalId}Header" style="height: 38px; background-color: ${retornaDatal('ysucursal','empresa') == '01' ? 'rgb(0, 44, 111)' : 'rgb(4, 100, 60)'}; color: deepskyblue;">
+            <h1 class="modal-title fs-5" id="${modalId}Label" style"font-size: 1.2vw;">${retornaDatal('xsucursal','codsucursal')} - ${modalTitle}</h1>
+<button type="button" class="btn btn-link btn-minimize" data-bs-toggle="modal" data-bs-target="${modalId}" style="position: absolute; top: 0; right: 0; padding: 0.5rem; color: #fff;"><i class="bi bi-dash-square"></i></button>
+            
+            <button type="button" id="${modalId}Cerrar" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background-color: ${sw_1 ? '#fff':'#aaa'}; width: 1vw; height: 2vh;"></button>
+          </div>
+          <div class="modal-body mt-0.1 mb-0.1" id="${modalId}Body" style="padding: 0;"></div>`
+          if (botones==2) modalHTML=modalHTML+ `
+          <div class="modal-footer" style="height: 46px; padding: 0; background-color:rgb(0 44 111);">
+            <button type="button" id="${modalId}Cerrar" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="margin: 0 5px;">Cerrar</button>
+            <button class="btn btn-primary btn-sm" id="${modalId}Detalles" data-bs-target="#${modalId}Toggle" data-bs-toggle="modal" style="margin: 0 15px;">Detalles</button>`
+            modalHTML=modalHTML+`
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  // Agregar el HTML al final del body
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+  // Permite movel el modal
+  $(`#${modalId}`).draggable({  //Modal Movible
+    handle: ".modal-header"  // modal-content = Mover desde cualquier parte  // modal-title = Mover desde el titulo  
+  });
+
+  // Mostrar la ventana modal
+  const modal = new bootstrap.Modal(document.getElementById(modalId));
+
+  var myModal = document.getElementById(modalId);
+  // Agregar una función de callback para el evento 'hidden.bs.modal'
+////
+// Obtén la referencia al elemento de la ventana modal que se va a abrir
+const highestZIndex = Array.from(document.getElementsByClassName('modal'))
+  .reduce((maxZIndex, modal) => {
+    const modalZIndex = parseInt(modal.style.zIndex) || 0;
+    return Math.max(maxZIndex, modalZIndex);
+  }, 0);
+// Asigna el valor más alto + 1 como z-index a la nueva ventana modal
+////myModal.style.zIndex = highestZIndex + 1 + (highestZIndex<40000? 40000 : 0);
+  sw_1 = true // invierte el valor del sw_1 de primera vez
+////
+  return modal
+}
+
+///////////////////////////////////////////////////////
+/// Buscar datos en sheet de Planeacion de Produccion
+///////////////////////////////////////////////////////
+function buscarCeldasSheetPro(valorBuscado,data)
+{
+  if (sw_msg) console.log('***buscarCeldasSheetPro***')
+  var resultados2 = [];
+  for (var i = 0; i < data.Celda.length; i++) {
+    for (var j = 0; j < data.Celda[i].length; j++) {
+      if (data.Celda[i][j].toString() === valorBuscado) {
+        var valor=data.Celda[i+1][j]
+        resultados2.push({ Fila: i, Columna: j, Color: data.Color[i][j] , Valor: valor, Dia: data.Celda[2][j]});
+        var k = j + 1;
+        while (k < data.Celda[i].length && data.Celda[i][k] === valorBuscado) {
+          var valor=data.Celda[i+1][k]
+          resultados2.push({ Fila: i, Columna: k, Color: data.Color[i][k] , Valor: valor, Dia: data.Celda[2][k]});
+          k++;
+        }
+        j = k - 1;
+      }
+    }
+  }
+  return resultados2;
+}
+
+///////////////////////////////////////////////////
+/// Buscar datos en Conmpras Nube MP
+///////////////////////////////////////////////////
+function buscarCeldasSheetMP(valorBuscado,data)
+{
+  if (sw_msg) console.log('***buscarCeldasSheetMP***')
+  var resultados2 = [];
+  for (var i = 0; i < data.Celda.length; i++) {
+    for (var j = 0; j < data.Celda[i].length; j++) {
+      if (data.Celda[i][j].toString() === valorBuscado) {
+        resultados2.push({ Fila: i, Columna: j, Color: data.Color[i][j] , Fecha: data.Celda[i][j+2], Kilos: data.Celda[i][j+3]});
+        var k = j + 1;
+        while (k < data.Celda[i].length && data.Celda[i][k] === valorBuscado) {
+          resultados2.push({ Fila: i, Columna: k, Color: data.Color[i][k] , Fecha: data.Celda[i][k+2], Kilos: data.Celda[i][k+3]});
+          k++;
+        }
+        j = k - 1;
+      }
+    }
+  }
+  return resultados2;
+}
+
+///////////////////////////////////////////////////
+/// Escapar caracteres para evitar script inyection
+///////////////////////////////////////////////////
+function escapeHtml(text) 
+{
+  if (sw_msg)console.log('*escapeHtml*')
+  var map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+
+  return text.replace(/[&<>"']/g, function(m) {
+    return map[m];
+  });
+}
+
+///////////////////////////////////////////////////
+/// Colapsa pestaña de Identificacion
+///////////////////////////////////////////////////
+function toggleCollapse() 
+{
+  if (sw_msg)console.log('*toggleCollapse*')
+    sw_1=true
+    let wiw = window.innerWidth;
+    let figure = document.getElementById('logo-collapsed');
+    let icon = document.getElementById('collapse-icon');
+    let userIcon = document.getElementById('user-icon-stack');    
+
+    figure.classList.toggle('d-none');
+    icon.classList.toggle('fa-angle-left');
+    icon.classList.toggle('fa-angle-right');
+
+    if (document.getElementById('user-name').innerText != "") {
+      if (figure.classList.contains("d-none")) userIcon.classList.remove("d-none");
+      else userIcon.classList.add("d-none");
+    } else userIcon.classList.add("d-none");
+
+    if(document.getElementById('table-body')){
+      let buttonsHeader = document.getElementById('header');
+      let tableBody = document.getElementById('table-body');
+
+      if(wiw < 768){
+        if(!figure.classList.contains('d-none')){
+          buttonsHeader.classList.add('mt-5', 'w-75');
+          if(document.getElementById('table-body2')) buttonsHeader.classList.remove('mt-5');
+          buttonsHeader.classList.remove('w-100');
+          buttonsHeader.setAttribute('style', 'max-width: 65%;');
+        }else{
+          buttonsHeader.classList.remove('mt-5', 'w-75');
+          //buttonsHeader.classList.add('w-100');
+          buttonsHeader.removeAttribute('style');
+          tableBody.classList.remove('mt-5');
+        }
+
+        if(wiw < 678) {
+          if(!figure.classList.contains('d-none')){
+            buttonsHeader.classList.remove('pe-5');
+            buttonsHeader.setAttribute('style', 'max-width: 58%;');
+            tableBody.classList.remove('mt-5');
+          }else{
+            buttonsHeader.classList.add('pe-5');
+            buttonsHeader.removeAttribute('style');              
+          }
+        }
+
+        if(wiw < 570){
+          //buttonsHeader.classList.add('w-100', 'mt-5');
+          buttonsHeader.classList.add('mt-5');
+          if(!figure.classList.contains('d-none')){              
+            buttonsHeader.removeAttribute('style');
+            tableBody.classList.add('mt-5');
+          }else{
+            tableBody.classList.remove('mt-5', 'pt-3');
+            buttonsHeader.classList.remove('mt-5');
+          }            
+        }
+      }else{
+        //buttonsHeader.classList.add('w-100');
+        buttonsHeader.classList.remove('mt-5', 'w-75');
+        buttonsHeader.removeAttribute('style');
+        tableBody.classList.remove('mt-5', 'pt-3');      
+      }   
+    }
+  }
+
+  function toggleCollapseNewPage(){
+    if (sw_msg)console.log('*toggleCollapseNewPage*')
+    if(window.innerWidth < 768){
+      document.getElementById('user-icon-stack').classList.remove('d-none');
+      document.getElementById('logo-collapsed').classList.add('d-none');
+      document.getElementById('collapse-icon').classList.remove('fa-angle-right');
+      document.getElementById('collapse-icon').classList.add('fa-angle-left');
+    }else{
+      document.getElementById('user-icon-stack').classList.add('d-none');
+      document.getElementById('logo-collapsed').classList.remove('d-none');
+      document.getElementById('collapse-icon').classList.add('fa-angle-right');
+      document.getElementById('collapse-icon').classList.remove('fa-angle-left');
+    }
+  }
+
+  function setTitle(e) {
+    if (sw_msg)console.log('*setTitle*')
+    e.title = document.getElementById('user-name').innerText;
+  }
+  
+///////////////////////////////////////////////////
+/// Funcin para Mostrar Mensajes en Pantalla
+///////////////////////////////////////////////////
+  function showMensaje(txtmsg) 
+  {
+    if (sw_msg)console.log('*showMensaje*')
+    espera.style.display='none'
+    sw_1=true
+    var modalContainer = document.createElement('div');
+    modalContainer.className = 'modal-container';
+    modalContainer.style.width = '20%';
+    modalContainer.style.height = '14%';
+    modalContainer.style.position = 'fixed';
+    modalContainer.style.top = '50%';
+    modalContainer.style.left = '50%';
+    modalContainer.style.transform = 'translate(-50%, -50%)';
+    modalContainer.style.background = 'rgba(0, 0, 0, 0.8)';
+    modalContainer.style.color = 'white';
+    modalContainer.style.textAlign = 'center';
+    modalContainer.style.padding = '20px';
+    modalContainer.style.borderRadius = '5px';
+    modalContainer.style.boxShadow = '5px 5px 5px rgba(0, 0, 0, 1)';
+    modalContainer.style.border = '5px solid white';
+    modalContainer.style.zIndex = '9999';
+    modalContainer.textContent = txtmsg;
+    document.body.appendChild(modalContainer);
+    setTimeout(function() {
+      document.body.removeChild(modalContainer);
+    }, 3000);
+  }
+
+///////////////////////////////////////////////////
+/// Funcin para Crear un Grafico con textos
+///////////////////////////////////////////////////
+  function Grafico_Palabras(xdata)
+  {
+    if (sw_msg)console.log('*Grafico_Palabras*')
+    const observaciones = xdata.map(item => item.observacion.replace(/\[Firma:\]/g, '').replace(/\S+@\S+\.\S+/g, '').replace(/\bfactura(s)?\b/gi, '').replace(/\bpara(s)?\b/gi, '').replace(/\bcliente(s)?\b/gi, '').match(/\b[a-zA-Z]{4,}\b/g)).join('\n');
+    const words = observaciones.toLowerCase().split(' ').filter(word => word.length >= 4).join(' ');
+
+    function getWordFrequency(text) 
+    {
+      if (sw_msg)console.log('*getWordFrequency*')
+      var words = text.match(/\b\w+\b/g); // Extraer palabras del texto
+      var wordFrequency = {};
+      for (var i = 0; i < words.length; i++) 
+      {
+        var word = words[i];
+        if (!wordFrequency[word]) {
+          wordFrequency[word] = 1;
+        } else {
+          wordFrequency[word]++;
+        }
+      }
+      return wordFrequency;
+    }
+
+    var wordFrequencyObject = getWordFrequency(words);
+    const wordFrequencyArray = [];
+    for (var word in wordFrequencyObject) 
+    {
+      wordFrequencyArray.push({ word: word, freq: wordFrequencyObject[word] });
+    }
+    //console.log(wordFrequencyArray);
+    lista = [];
+    for (var i in wordFrequencyArray) {
+      lista.push([wordFrequencyArray[i]["word"], wordFrequencyArray[i]["freq"]])
+    }
+    //console.log(lista);
+
+    // Configuración de la nube de palabras
+    const options = {
+        list: lista,
+        gridSize: 12,
+        weightFactor: lista.length <50 ? 10 : 20,
+        fontFamily: "Arial, sans-serif",
+        color: "random-dark",
+        backgroundColor: "#fff",
+        rotateRatio: 0.5,
+        shape: "square",
+        drawOutOfBound: false,
+    };
+
+    showModal('Mod_wordcloud', 'Observaciones', 1 ,'modal-xl')
+    var myModal = new bootstrap.Modal(document.getElementById('Mod_wordcloud'))  // Crea Ventana Modal
+    var grafi1 = document.createElement('canvas');
+    grafi1.id     = 'wordcloud';
+    grafi1.width  = 1200;
+    grafi1.height = 600;
+    Mod_wordcloudBody.appendChild(grafi1);
+    myModal.show()
+    // Crear la nube de palabras
+    WordCloud(document.getElementById('wordcloud'), options);
+  }
+
+///////////////////////////////////////////////////
+/// Funcion para Leer en audio un texto
+///////////////////////////////////////////////////
+  function text_Speech(xdata, xbtn) {
+    if (sw_msg)console.log('*text_Speech*')
+    if ('speechSynthesis' in window) {
+        const botonVox = document.getElementById(xbtn);
+        
+        if (!botonVox) {
+            console.error('Botón no encontrado');
+            return;
+        }
+        
+        botonVox.id = xbtn + '_new';
+
+        const speech = new SpeechSynthesisUtterance();
+        speech.rate = 1.5;
+        speech.lang = "es-CO";
+
+        let isPaused = true;
+        let currentSentenceIndex = 0;
+        let sentences = [];
+
+        function prepareSentences(data) {
+          if (sw_msg)console.log('*prepareSentences*')
+            sentences = data.map(item => item.nombre + " : " + item.observacion.replace(/\[Firma:\]/g, '').replace(/\S+@\S+\.\S+/g, ''));
+            currentSentenceIndex = 0;
+        }
+        
+        prepareSentences(xdata);
+
+        speech.onend = function(event) {
+            if (!isPaused) {
+                if (currentSentenceIndex < sentences.length) {
+                    speech.text = sentences[currentSentenceIndex];
+                    currentSentenceIndex++;
+                    speechSynthesis.speak(speech);
+console.log('1')
+                } else {
+                    isPaused = true;
+                    botonVox.id = xbtn;
+console.log('1.1')
+                }
+            }
+        };
+
+        function toggleSpeech() {
+            if (!isPaused) {
+                isPaused = true;
+                speechSynthesis.cancel();
+console.log('1.2')
+            } else {
+                isPaused = false;
+                if (currentSentenceIndex < sentences.length) {
+                    speech.text = sentences[currentSentenceIndex];
+                    currentSentenceIndex++;
+                    speechSynthesis.speak(speech);
+console.log('2')
+                } else {
+                    prepareSentences(xdata); // Reset sentences if all have been spoken
+                    if (currentSentenceIndex < sentences.length) {
+                        speechSynthesis.cancel()
+                        speech.text = sentences[currentSentenceIndex];
+                        currentSentenceIndex++;
+                        speechSynthesis.speak(speech);
+console.log('3')
+                    }
+                    else {
+console.log('4')
+                    }
+                }
+            }
+        }
+
+        botonVox.addEventListener('click', toggleSpeech);
+    } else {
+        console.error('La API SpeechSynthesis no es compatible con este navegador.');
+    }
+  }
+
+  function mail_detalle(mail_to,mail_cc,mail_asunto,mail_body)
+  {
+    if (sw_msg)console.log('*mail_detalle*')
+     var mail={
+          'to': mail_to,
+          'cc': mail_cc,
+          'subject': mail_asunto+' | '+formatDate(new Date(),'yyyy/mm/dd-hh:mi'),
+          'message': 'Este mensaje fue autogenerado desde AisaCloud.\n',
+          'nameSender': 'AisaCloud'
+        }
+        var mensaje=` <!DOCTYPE html>
+        <html lang="es">
+        <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>.</title>
+        <style>
+          body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 0;
+          }
+          .header-img {
+              max-width: 250px;
+              display: block;
+              margin: 0 auto;
+          }
+          .table-container {
+              margin: 20px auto;
+              width: 80%;
+          }
+          table {
+              border-collapse: collapse;
+              width: 100%;
+          }
+          th, td {
+              border: 1pt solid grey;
+              padding: 0.5em;
+              text-align: center;
+          }
+          th {
+              background-color: #f2f2f2;
+          }
+          h2, h5 {
+              text-align: center;
+              margin: 0;
+          }
+        </style>
+        </head>
+        <body>
+        <a href="www.acerosindustriales.com">
+        <img src="https://lh3.google.com/d/1UBjwwfVYliVPYfa5Q1YaSpyyID8ZHTUc" class="rounded-top shadow" style="max-width: 200px;" alt="Aceros">
+        </a>
+        <h2><center><style="padding: 0rem; border: 0rem; margin: 0rem;">${titulo.textContent.substring(8,50)}</center></h2>
+        <h4><center>`+mail_asunto+`</center></h4>
+        <br><br>`+mail_body+`
+        </body></html> ` 
+console.log(mensaje)
+        mail.htmlBody=mensaje
+      return(mail)
+  }
+
+///////////////////////////////////////////////////
+/// Funcin reemplaza los NaN con 0
+///////////////////////////////////////////////////
+function replaceNaNWithZero(data) 
+{
+  for (let key in data) {
+    if (typeof data[key] === 'string' && isNaN(data[key])) {
+      data[key] = 0;
+    }
+  }
+  return data;
+}
+
+ </script>
+    

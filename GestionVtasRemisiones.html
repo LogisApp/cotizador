@@ -1,0 +1,50 @@
+<!-- Contenido de la aplicación de remisiones -->
+<script>
+  function pag_Remisiones()
+  {
+    const pag=`
+      <div class="d-flex flex-column p-2 bg-secondary text-white">
+<span>parte 1</span>
+<span>parte 1.1</span>
+      </div>
+
+      <div class="d-flex flex-column p-2 bg-secondary text-white">
+<span>parte 2</span>
+<span>parte 2.1</span>
+      </div> 
+      <div id="TRemision"></div>
+      `
+
+    document.getElementById('ModRemisionesBody').innerHTML=pag
+
+    let xsql=` select m.codigo,cl.nombre,nrodocapli,min(femision) as emision,${empresa()}${base}proc_carterafv (m.nrodocapli,m.codigo) as vence,sum(valor+iva) as saldo,max((EXTEND(current, YEAR TO DAY) - EXTEND(femision, YEAR TO DAY))) AS dias 
+            from ${empresa()}${base}v_mvtoactivo1 m 
+            left join ${empresa()}${base}concxc c on c.codconcxc=m.codconcxc
+            left join ${empresa()}${base}clientes cl on cl.codigo=m.codigo
+            where m.codigo='32I05' 
+            group by m.codigo,cl.nombre,nrodocapli
+            having sum(valor+iva)<>0
+            order by emision `
+
+    loadInfo(xsql,(data)=>{
+      var xcampos=`
+        [
+          {
+            "title": "nombre",
+            "field": "nombre",
+            "width": 350
+          },
+          {
+            "title": "nrodocapli",
+            "field": "nrodocapli",
+            "width": 150
+          },          {
+            "title": "saldo",
+            "field": "saldo",
+            "width": 150
+          }        
+        ]`
+      ttable ('H','#TRemision',data,'Pruebas Remision',xcampos,'','','modal-xl','','50%')
+    })
+  }
+</script>

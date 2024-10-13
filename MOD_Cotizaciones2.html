@@ -1,0 +1,282 @@
+<script>
+function MOD_Cotizaciones2()
+{
+  html=`
+<style type="text/css" nonce="">
+    .ritz .waffle .s5{
+        text-align:center;
+        font-family:'Arial';
+        font-size:10pt;
+        padding:0;
+        }
+    .ritz .waffle .s2{
+        text-align:left;
+        font-family:'Arial';
+        font-size:10pt;
+        padding:2px 3px 2px 3px;
+    }
+    .ritz .waffle .s0{
+        text-align:center;
+        font-family:'Arial';
+        font-size:10pt;
+        padding:2px 3px 2px 3px;
+    }
+    .ritz .waffle .s1{
+         text-align:left;
+         font-family:'Arial';
+         padding:0;
+    }
+    .ritz .waffle .s6{
+        text-align:left;
+        font-family:'Arial';
+        font-size:10pt;
+        padding:2px 3px 2px 3px;
+        }
+    .xsubTitle{
+    display: flex;
+    align-items: center;
+    border-radius: 2px;
+    padding: 0 0 0 5px;
+    height: 25px;
+    margin: 0 0 2 0px;
+    background-color: var(--titulo-colorF);
+    background: blue;
+    }
+    .xinput{
+        width: 100%;
+        height: 25px;
+    }
+    .xtable{
+        display: flex;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+    }
+    .table{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .grid-container{
+        display: flex;
+        justify-content: center;
+    }
+</style>
+
+</head>
+        <body class="docs-gm">
+            <div class="ritz grid-container" dir="ltr">
+                <table class="waffle no-grid" cellspacing="0" cellpadding="0">
+                    <thead>
+                        <tr>
+                            <th class="row-header freezebar-origin-ltr
+header-shim row-header-shim"></th>
+                            <th id="0C0" style="width:100px;"
+class="header-shim"></th>
+                            <th id="0C1" style="width:100px;"
+class="header-shim"></th>
+                            <th id="0C2" style="width:100px;"
+class="header-shim"></th>
+                            <th id="0C3" style="width:77px;"
+class="header-shim"></th>
+                            <th id="0C4" style="width:100px;"
+class="header-shim"></th>
+                            <th id="0C5" style="width:50px;"
+class="header-shim"></th>
+                            <th id="0C6" style="width:100px;"
+class="header-shim"></th>
+                            <th id="0C7" style="width:100px;"
+class="header-shim"></th>
+                            <th id="0C8" style="width:100px;"
+class="header-shim"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="height: 20px">
+                            <th id="0R0" class="row-headers-background
+row-header-shim"></th>
+                            <td class="s0" dir="ltr"
+colspan="9"><H3>CONDICIONES COMERCIALES CLIENTE</H3></td>
+                        </tr>
+
+                        <tr style="height: 20px">
+                          <th id="0R1" style="height: 20px;"
+class="row-headers-background row-header-shim"></th>
+                            <td class="s1" dir="ltr"><div
+class="xsubTitle">Cliente:</div></td>
+                            <td class="s2"><input type="text" id="CodCliente" class="xinput" value='' disabled></td>
+                            <td class="s2" colspan="3"><input type="text" id="NomCliente" class="xinput" value='' disabled></td>
+                            <td class="s3"></td>
+                            <td class="s1" dir="ltr"><div
+class="xsubTitle">Ultima Modif:</div></td>
+                            <td class="s2" colspan="2"><input
+type="text" id="UltimaModificacion" class="xinput" disabled></td>
+                        </tr>
+                        <tr style="height: 20px">
+                            <th id="0R2" class="row-headers-background
+row-header-shim"></th>
+                            <td class="s1" dir="ltr"><div
+class="xsubTitle">Producto:</div></td>
+                            <td class="s2" colspan="4"><input
+type="text" class="xinput" id="xProducto" disabled></td>
+                            <td class="s4"></td>
+                            <td class="s4"></td>
+                            <td class="s4"></td>
+                            <td class="s4"></td>
+                        </tr>
+                        <tr style="height: 20px">
+                            <th id="0R3" style="height: 20px;"
+class="row-headers-background row-header-shim"></th>
+                            <td class="s1" dir="ltr"><div
+class="xsubTitle">Contacto:</div></td>
+                            <td class="s2" colspan="8"><input
+type="text" class="xinput" id="xContacto1" disabled></td>
+                        </tr>
+                         <tr style="height: 20px">
+                             <th id="0R4" style="height: 20px;"
+class="row-headers-background row-header-shim"> </th>
+                                 <td class="s1" dir="ltr"><div
+class="xsubTitle">Contacto:</div></td>
+                                 <td class="s2" colspan="4"><input
+type="text" class="xinput" id="xContacto2" disabled></td>
+                                 <td></td>
+                                 <td></td>
+                                 <td></td>
+                                 <td></td>
+                         </tr>
+                        <tr style="height: 20px">
+                            <th id="0R5" style="height: 20px;"
+class="row-headers-background row-header-shim"></th>
+                            <td class="s5" dir="ltr"
+colspan="9">ESCALAS PRECIOS DE VENTAS </td>
+                        </tr>
+                        <tr style="height: 20px;">
+                         <th id="0R6" style="height: 20px;"
+class="row-headers-background row-header-shim"></th>
+                             <td class="s6" dir="ltr"><div
+class="xsubTitle" class="xtable">Cod.</div></td>
+                             <td class="s6" dir="ltr" colspan="2"><div
+class="xsubTitle">Material.</div></td>
+                             <td class="s6" dir="ltr"><div
+class="xsubTitle">Escala.</div></td>
+                             <td class="s6" dir="ltr" colspan="5"><div
+class="xsubTitle">Observacion</div></td>
+                         </tr>
+                         <tr style="height: 20px">
+                             <th id="0R7" style="height: 20px;"
+class="row-headers-background row-header-shim"></th>
+                             <td class="s2"><input type="text"
+class="xinput" disabled></td>
+                             <td class="s2" colspan="2"><input
+type="text" class="xinput" disabled></td>
+                             <td class="s2"><input type="text"
+class="xinput" disabled></td>
+                             <td class="s2" colspan="5"><input
+type="text" class="xinput" disabled></td>
+                         </tr>
+                         <tr style="height: 20px">
+                                 <th id="0R8" style="height: 20px;"
+class="row-headers-background row-header-shim"></th>
+                                 <td class="s2"><input type="text"
+class="xinput" disabled></td>
+                                 <td class="s2" colspan="2"><input
+type="text" class="xinput" disabled></td>
+                                 <td class="s2"><input type="text"
+class="xinput" disabled></td>
+                                 <td class="s2" colspan="5"><input
+type="text" class="xinput" disabled></td>
+                         </tr>
+                         <tr style="height: 20px">
+                             <th id="0R9" style="height: 20px;"
+class="row-headers-background row-header-shim"></th>
+                             <td class="s2"><input type="text"
+class="xinput" disabled></td>
+                             <td class="s2" colspan="2"><input
+type="text" class="xinput" disabled></td>
+                             <td class="s2"><input type="text"
+class="xinput" disabled></td>
+                             <td class="s2" colspan="5"><input
+type="text" class="xinput" disabled></td>
+                         </tr>
+                         <tr style="height: 20px">
+                             <th id="0R10" style="height: 20px;"
+class="row-headers-background row-header-shim"></th>
+                             <td class="s2"><input type="text"
+class="xinput" disabled></td>
+                             <td class="s2" colspan="2"><input
+type="text" class="xinput" disabled></td>
+                             <td class="s2"><input type="text"
+class="xinput" disabled></td>
+                             <td class="s2" colspan="5"><input
+type="text" class="xinput" disabled></td>
+                         </tr>
+                         <tr style="height: 20px">
+                             <th id="0R11" style="height: 20px;"
+class="row-headers-background row-header-shim"></th>
+                             <td class="s2"><input type="text"
+class="xinput" disabled></td>
+                             <td class="s2" colspan="2"><input
+type="text" class="xinput" disabled></td>
+                             <td class="s2"><input type="text"
+class="xinput" disabled></td>
+                             <td class="s2" colspan="5"><input
+type="text" class="xinput" disabled></td>
+                         </tr>
+                         <tr style="height: 20px">
+                             <th id="0R12" style="height: 20px;"
+class="row-headers-background row-header-shim"></th>
+                             <td class="s2"><input type="text"
+class="xinput" disabled></td>
+                             <td class="s2" colspan="2"><input
+type="text" class="xinput" disabled></td>
+                              <td class="s2"><input type="text"
+class="xinput" disabled></td>
+                             <td class="s2" colspan="5"><input
+type="text" class="xinput" disabled></td>
+                         </tr>
+                         <tr style="height: 20px">
+                             <th id="0R13" style="height: 20px;"
+class="row-headers-background row-header-shim"></th>
+                             <td class="s2"><input type="text"
+class="xinput" disabled></td>
+                             <td class="s2" colspan="2"><input
+type="text" class="xinput" disabled></td>
+                             <td class="s2"><input type="text"
+class="xinput" disabled></td>
+                             <td class="s2" colspan="5"><input
+type="text" class="xinput" disabled></td>
+                         </tr>
+                         <tr style="height: 20px">
+                             <th id="0R14" style="height: 20px;"
+class="row-headers-background row-header-shim"></th>
+                             <td class="s0" dir="ltr"
+colspan="9">Observaciones Fletes</td>
+                         </tr>
+                         <tr style="height: 23px">
+                             <th id="0R15" style="height: 23px;"
+class="row-headers-background row-header-shim"></th>
+                             <td class="s2" colspan="9"><input
+type="text" class="xinput" id="xObservaciones-Fletes" disabled ></td>
+                         </tr>
+                         <tr style="height: 20px">
+                             <th id="0R16" style="height: 20px;"
+class="row-headers-background row-header-shim"></th>
+                                 <td class="s0" dir="ltr"
+colspan="9"><div class="Observacionesx">Observaciones Generales</div>
+</td>
+                         </tr>
+                         <tr style="height: 28px">
+                             <th id="0R17" style="height: 28px;"
+class="row-headers-background row-header-shim"></th>
+                             <td class="s2" colspan="9"><input
+type="text" class="xinput" id="xObservaciones-Generales"
+disabled></td>
+                         </tr>
+                    </tbody>
+                </table>
+            </div>
+  `
+  return html
+}
+</script>
+

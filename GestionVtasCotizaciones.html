@@ -1,0 +1,655 @@
+<!-- Contenido de la aplicación de cotizaciones -->
+<script>
+  function pag_Cotizaciones()
+  {
+    var pag0=`
+      <div class="d-flex p-2 tdatos2 text-white">
+        <div class="tit1">Cliente </div>
+        <div style="flex: 1;" > 
+          <span class='aria-pressed="true" hvr-pulse-shrink' id='ycontacto' title="Condiciones Comerciales"></span>
+        </div>
+        <div style="flex: 5;">
+          <input class="form-control input " list="datalistCliente" id="xcliente" type='search'  placeholder="Digite para buscar..." autocomplete="off" onkeyup = "this.value=this.value.toUpperCase()" onchange="buscar_cliente(this)" onkeydown="onKeyDownCli(event)"> 
+          <datalist id="datalistCliente" class="form-control-sm tit0" type="search"></datalist>
+        </div>
+
+        <div class="tit1">Codigo</div>
+        <div style="flex: 1;" > 
+          <span class='aria-pressed="true" hvr-pulse-shrink' id='ysaldo' title="Cartera Pendiente" disabled></span>
+        </div>
+        <input class="form-control input" name="campo"  type="text" id= "xcodigo" placeholder="" aria-label="Disabled input example" disabled >
+
+        <div class="tit1">Vendedor</div>
+        <div style="flex: 1;" > 
+          <span id='yvendedor' title="Ventas Vendedor" class="Idisabled hvr-pulse-shrink"></span>
+        </div>
+        <input class="form-control input" name="campo"  type="text" id= "xvendedor" placeholder="" aria-label="Disabled input example" disabled >
+        <input class="form-control input" name="campo"  type="text" id= "xnom_vend" placeholder="" aria-label="Disabled input example" disabled >
+      </div>
+
+      <div class="d-flex p-2 tdatos2 text-white">
+
+        <div class="tit1">Mail</div>
+        <div style="flex: 2;" > 
+          <select class="form-select input tit0"  id="xmail" select="datalistMail" readonly></select>  
+        </div>
+
+        <div class="tit1">Contacto</div>
+        <span class='aria-pressed="true" hvr-pulse-shrink' id='ycontacto' title="Agregar Contacto"></span>
+        <div style="flex: 1;" > 
+          <input class="form-control input" name="campo"  type="text" id= "xcontactos" placeholder="" aria-label="Disabled input example" >
+        </div>
+<div></div>
+
+      </div>
+`
+var pag1=`
+      <div class="d-flex p-2 tdatos2 text-white">
+        <div class="tit1" title="Forma de Pago">F.Pago</div>
+        <select class="form-select input xfpago"  id="xfpago" select="datalistFpago"></select>
+
+        <div class="tit1">Telefono</div>
+          <span id='ytelefono' title="Telefono / Celular" class="hvr-pulse-shrink"></span>
+        <div style="flex: 1;" > 
+          <input class="form-control input" name="campo"  type="text" id= "xtelefono" placeholder="" aria-label="Disabled input" >
+        </div>
+
+        <div class="tit1">SubTotal</div>
+        <div style="flex: 1;" > 
+          <input class="form-control input" name="campo"  type="text" id= "xneto" placeholder="0" aria-label="Disabled input" >
+        </div>
+
+      </div>
+
+      <div class="d-flex p-2 tdatos text-black">
+
+        <div class="tit0 LtooltipModal"> 
+          <span class="Ltooltiptext" id="xproducto_tooltip1">
+        </div>
+
+        <div style="flex: 4;" class="cinput">
+          <div class="tit0">
+            Producto
+            <input class="form-check-input" type="checkbox" title="Mostrar Detalles" value="" id="haydetalles">
+          </div>
+           <input class="form-control cinput" list="datalistProducto" id="xproducto" type='search' placeholder="Digite para buscar..." autocomplete="off" onchange="buscar_producto(this)" onkeyup = "this.value=this.value.toUpperCase()" oncontextmenu="buscarSheet(event,this.value)"  onkeydown="onKeyDownPro(event)">
+            <datalist id="datalistProducto" class="form-control-sm" type="search">
+            </datalist>
+        </div>
+
+        <div style="flex: 0.6;" class="input-wrapper cinput">
+          <div class="tit0">T.Peso</div>
+            <select class="form-select input"  name="xtpeso" id="xtpeso" select="datalistUnidades" onchange="ocultacampos_medida()"> </select>
+        </div>
+
+        <div style="flex: 1;" class="cinput">
+          <div class="tit0">Cantidad</div>
+          <input class="form-control input_n" name="xcantidad" id= "xcantidad" type="number" placeholder="0.0" aria-label="Disabled input example" value=0 min="0" onchange="calcula_item()" disabled>
+        </div>
+
+        <div style="flex: 0.6;"class="cinput">
+          <div class="tit0" title="Tipo de Precio">TPrecio</div>
+          	<select class="form-select input" id="xtprecio" name="xtprecio">
+              <option value="K">Kilos</option>
+              <option value="U">Unidades</option>
+            </select>
+        </div>
+
+        <div style="flex: 1;"class="cinput">
+          <div class="tit0">Precio</div>
+          <input class="form-control input_n" name="xprecio" id= "xprecio" type="number" placeholder="0.0" aria-label="Disabled input example" value=0 onchange="calcula_item()">
+        </div>
+
+        <div style="flex: 0.5;"class="cinput">
+          <div class="tit0">Impuesto</div>
+          <input class="form-control input_n" name="ximpuesto" id= "ximpuesto" type="number" placeholder="0.0" aria-label="Disabled input example" disabled value=0 >
+        </div>
+
+        <div style="flex: 0.5;"class="cinput">
+          <div class="tit0">Descto</div>
+          <input class="form-control input_n" name="campo" id= "xdescto" type="number" placeholder="0.0" aria-label="Disabled input example" value=0 min="0" max="100" onchange="calcula_item()">
+        </div>
+
+        <div style="flex: 1.5;"class="cinput">
+          <div class="tit0">Total</div>
+          <input class="form-control input_n" name="campo" id= "xtotal_lin"  placeholder="0.0" aria-label="Disabled input example" disabled value="0" step="0.01">
+        </div>
+
+        <div style="flex: 0.5;"class="cinput">
+          <div class="tit0" title="Rentabilidad">%</div>
+          <input class="form-control input_n" name="campo" id= "xrentabilidad" type="number" placeholder="0.0" aria-label="Disabled input example" disabled value=0 >
+        </div>
+
+        <div style="flex: 0.5;"class="cinput">
+          <div class="tit0" title="Buzon">Buzon</div>
+          <input class="form-control input_n" name="campo" id= "xbuzon" type="text" placeholder="" aria-label="Disabled input example" value ='Z' disabled>
+        </div>
+  
+      </div>
+      
+      <!--inicio---!>
+
+
+      <div class="" id="divunidades" style="display:none">
+       
+        <div style="flex: 0.5;" class="cinput">
+          <div class="tit0">Medida</div>
+            <select class="form-select input" id="xmedida" name="xmedida">
+              <option value="1">Metros</option>
+              <option value="2">Pulgadas</option>
+            </select>
+        </div>
+
+        <div style="flex: 0.5;" class="cinput">
+          <div class="tit0">¿Cuántos Metros?</div>
+          <input class="form-control input_n" name="xmetros" id="xmetros" type="number" placeholder="0" aria-label="Disabled input example" value="0" min="0" max="">
+        </div>
+
+        <div style="flex: 0.5;" class="cinput">
+           <div class="tit0">¿Cuántos Centímetros?</div>
+          <input class="form-control input_n" name="xcentimetros" id="xcentimetros" type="number" placeholder="0" aria-label="Disabled input example" value="0" min="0" max="100">
+        </div>
+
+        <div style="flex: 0.5;" class="cinput">
+           <div class="tit0">¿Cuántos Milímetros?</div>
+          <input class="form-control input_n" name="xmilimetros" id="xmilimetros" type="number" placeholder="0" aria-label="Disabled input example" value="0" min="0" max="10">
+        </div>
+    
+      </div>
+
+
+      <!---fin--!>
+
+
+
+      <div class="d-flex p-2 tdatos2 text-white">
+
+        <div class="d-flex">
+          <div class="tit1">Obs. Ventas</div>
+          <div style="flex: 2;" > 
+            <input class="form-control input" name="campo" type="text" id="xobserv_vta" placeholder="" aria-label="Disabled input example">
+          </div>
+        </div>
+
+        <div class="d-flex">
+          <div class="tit1" title="Fecha de Produccion">F.Produc</div>
+          <div style="flex: 2;" class="pe-2"> 
+            <input class="form-control input" name="campo" id="xfechapro" type="date" aria-label="Disabled input example" value="` + fecha(new Date(), 0, 'Ymd') + `" min="` + fecha(new Date(), 0, 'Ymd') + `" max="` + fecha(new Date(), 180, 'Ymd') + `">
+          </div>
+        </div>
+  
+        <div class="d-flex">
+          <div class="tit1" title="Fecha Entrega a Cliente">F.Entrega</div>
+          <div style="flex: 2;" class="pe-2"> 
+            <input class="form-control input" name="campo" id="xfechaent" type="date" aria-label="Disabled input example" value="` + fecha(new Date(), 1, 'Ymd') + `" min="` + fecha(new Date(), 1, 'Ymd') + `" max="` + fecha(new Date(), 180, 'Ymd') + `">
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex p-2 tdatos2 text-white">
+        <div>
+          <div class="tit1">Item Cambio Interno</div>
+          <div class="tit2">
+            <input class="form-control input" name="campo" type="text" id="xitem2" placeholder="" aria-label="Disabled input example">
+          </div>
+        </div>
+
+        <div style="flex: 1.5;" title="Norma de Calidad">
+          <div class="tit1">Norma</div>
+          <div class="tit2">
+            <input class="form-control input_n" name="campo" id="xnorma" type="number" placeholder="" aria-label="Disabled input example" value="" disabled>
+          </div>
+        </div>
+
+        <div style="flex: 1.5;" title="Grado del Material">
+          <div class="tit1">Grado</div>
+          <div class="tit2">
+            <input class="form-control input_n" name="campo" id="xgrado" type="number" placeholder="" aria-label="Disabled input example" value="" disabled>
+          </div>
+        </div>
+
+        <div style="flex: 0.6;"class="cprog">
+          <div class="tit1" title="Tipo de Programacion">Prog/No.Prog</div>
+            <div class="tit2">
+          	<select class="form-select input" id="xprog">
+              <option value="P">Programado</option>
+              <option value="N">No Programado</option>
+            </select>
+            </div>
+        </div>
+
+        <div style="flex: 1.2;" class="cpedidos">
+          <div class="tit1">Pedidos </div>
+          <div class="tit2">
+            <select class="form-select input"  id="xpedidos" select="datalistPedidos"> </select>
+          </div>
+        </div>
+
+        <div style="flex: 1.5;" class="cexistencia">
+          <div class="tit1">Existencia
+            <input class="form-check-input" type="checkbox" title="Con existencia o Todos" value="" id="hayexistencia" >
+          </div>
+          <div class="tit2">
+            <select class="form-select input"  id="xexistencia" select="datalistExistencia"> </select>
+          </div>
+        </div>
+
+        <div class="d-flex ctotales">
+          <div class="d-flex btn-act-can">
+            <button class="btn btn-large btn-primary btn-sm active xxactualizar fa fa-check" id="xxactualizar" data-bs-toggle=""  aria-pressed="true" title="Actualizar item" disabled ></button>
+          </div>
+          <div class="d-flex btn-act-can">
+            <button class="btn btn-large btn-danger btn-sm active xxeliminar fa fa-times" id="xxeliminar" data-bs-toggle=""  aria-pressed="true" title="Eliminar item" disabled ></button>
+          </div>
+        </div>
+
+      </div>
+
+      <div id="TCotizacion"></div>
+      `
+pag=pag0+pag1
+    document.getElementById('ModCotizacionesBody').innerHTML=pag
+    document.getElementById('xcliente').focus();
+
+$(document).ready(() => {
+
+
+
+  var table = new Tabulator("#TCotizacion", {
+    data:tableData, //set initial table data
+    responsiveLayout: true,
+    maxHeight:"30%",
+    columns:[
+        {title:"vendedor", field:"vendedor"},
+        {title:"fech_vtas", field:"fech_vtas"},
+        {title:"hora_vtas", field:"hora_vtas"},
+        {title:"item", field:"item"},
+        {title:"grado", field:"grado"},
+        {title:"kilos", field:"kilos"},
+        {title:"precio", field:"precio"},
+        {title:"descuento", field:"descuento"},
+        {title:"unidades", field:"unidades"},
+        {title:"tipolong", field:"tipolong"},
+        {title:"entero", field:"entero"},
+        {title:"dividendo_cms", field:"dividendo_cms"},
+        {title:"divisor_mms", field:"divisor_mms"},
+        {title:"tipopeso", field:"tipopeso"},
+        {title:"pedido_esta", field:"pedido_esta"},
+        {title:"fech_entrega", field:"fech_entrega"},
+        {title:"modifica", field:"modifica"},
+        {title:"fentr_ant", field:"fentr_ant"},
+        {title:"fech_factura", field:"fech_factura"},
+        {title:"obs_vtas", field:"obs_vtas"},
+        {title:"obs_despachos", field:"obs_despachos"},
+        {title:"obs_bod_cor", field:"obs_bod_cor"},
+        {title:"unid_prepar", field:"unid_prepar"},
+        {title:"kilos_prepar", field:"kilos_prepar"},
+        {title:"prep_1", field:"prep_1"},
+        {title:"prep_2", field:"prep_2"},
+        {title:"bascula", field:"bascula"},
+        {title:"vehiculo", field:"vehiculo"},
+        {title:"factura", field:"factura"},
+        {title:"transportadora", field:"transportadora"},
+        {title:"fech_transp", field:"fech_transp"},
+        {title:"cot_ped", field:"cot_ped"},
+        {title:"prec_kguni", field:"prec_kguni"},
+        {title:"item_ci", field:"item_ci"},
+        {title:"cons_itp", field:"cons_itp"},
+        {title:"nro_op", field:"nro_op"},
+        {title:"nro_lote2", field:"nro_lote2"},
+        {title:"nro_lote3", field:"nro_lote3"},
+        {title:"kgs_lote1", field:"kgs_lote1"},
+        {title:"kgs_lote2", field:"kgs_lote2"},
+        {title:"kgs_lote3", field:"kgs_lote3"},
+        {title:"nro_incump", field:"nro_incump"},
+        {title:"calc_desperd", field:"calc_desperd"},
+        {title:"norma_pt", field:"norma_pt"},
+        {title:"fprod_vtas", field:"fprod_vtas"},
+        {title:"longitud", field:"longitud"},
+        {title:"causa2", field:"causa2"},
+        {title:"tipo_fentr", field:"tipo_fentr"},
+        {title:"flete_kg", field:"flete_kg"},
+    ]
+  });
+  // Funcion click sobre la fila
+  table.on("rowClick", function(e, row){
+  //      console.log(row)
+  //      obj=row._row.data
+  //      console.log(obj)
+    table.deselectRow();
+    row.select();
+  });
+  // Agregar el evento al elemento padre
+  $(".d-flex").on("click", ".xxactualizar", ()=>{
+    $('#xxactualizar').prop('disabled', true); // Para deshabilitar el elemento
+//    $('#xxeliminar').prop('disabled', true); // Para deshabilitar el elemento
+    var tableData  = [
+    {vendedor    : retornaDatal('xvendedor'), 
+    fech_vtas    : fecha(new Date(),0,'mdy'), 
+    hora_vtas    : hora(), 
+    item         : retornaDatal('xproducto').split("|").shift(), 
+    grado        : retornaDatal('xgrado'), 
+    kilos        : retornaDatal('xcantidad'), 
+    precio       : retornaDatal('xprecio'), 
+    descuento    : retornaDatal('xdescto'),
+    fech_entrega : retornaDatal('xfechaent'),
+    obs_vtas     : retornaDatal('xobserv_vta'),
+    cot_ped      : 'S', // S=Cotizacion P=Pedido
+    item_ci      : retornaDatal('xitem2')}
+    ]
+    table.addData(tableData, true)
+    asignaValor('xproducto','')
+    asignaValor('xtotal_lin',0)
+    asignaValor('xprecio',0)
+    asignaValor('xobserv_vta','')
+    asignaValor('xpedidos','')
+    asignaValor('xexistencia','')
+    asignaValor('xcantidad',0)
+    document.getElementById('xproducto').focus()
+  });
+  // Seleccionar el botón por su ID
+  const botonEliminar = $("#xxeliminar");
+
+  // Realizar acciones sobre el botón
+  botonEliminar.click(()=>{
+  //  $(".d-flex.btn-act-can").on("click", ".xxeliminar", ()=>{
+    var xtabla = Tabulator.prototype.constructor.findTable('#TCotizacion')[0];
+    if (xtabla) 
+    {
+      var row = xtabla.getSelectedRows(); // Obtener la fila seleccionada
+      if (row.length > 0) { // Verificar si hay alguna fila seleccionada
+        var rowNum = row[0]._row.position; // Obtener el número de fila de la fila seleccionada
+        Swal.fire({
+          title: "Realmente quiere eliminar la fila?"+rowNum,
+          showDenyButton: true,
+          confirmButtonText: "Si",
+          denyButtonText: `No`
+        }).then((result) => {
+          /* Read more about isConfirmed, isDenied below */
+          if (result.isConfirmed) {
+            row[0].delete();
+            Swal.fire("Eliminada!", "", "success");
+          }
+        });
+      } else {
+        Swal.fire("No hay Fila seleccionada");
+      }
+    }
+  });
+
+  // Seleccionar el contenido cuando se recibe el foco para todos los inputs
+  document.querySelectorAll('.input_n').forEach(function(input) {
+    input.addEventListener('focus', function() {
+      this.select();
+    });
+  });
+});
+
+    const xcliente   = document.getElementById('xcliente');
+
+    document.getElementById('xtpeso').addEventListener('keydown', (event) => 
+    {
+      if (event.key === 'Enter') document.getElementById('xcantidad').focus()
+    });
+
+    document.getElementById('xcantidad').addEventListener('keydown', (event) => 
+    {
+      if (event.key === 'Enter' && retornaDatal('xcantidad')>0) document.getElementById('xtprecio').focus()
+    });
+
+    document.getElementById('xtprecio').addEventListener('click', ()=> 
+    {
+      document.getElementById('xprecio').focus()
+    });
+
+    document.getElementById('xprecio').addEventListener('keydown', (event) => 
+    {
+      if (event.key === 'Enter') document.getElementById('xobserv_vta').focus()
+    });
+
+    document.getElementById('xobserv_vta').addEventListener('keydown', (event) => 
+    {
+      if (event.key === 'Enter') document.getElementById('xfechapro').focus()
+    });
+
+    document.getElementById('xfechapro').addEventListener('keydown', (event) => 
+    {
+      if (event.key === 'Enter') document.getElementById('xfechaent').focus()
+    });
+
+    document.getElementById('xfechaent').addEventListener('keydown', (event) => 
+    {
+      if (event.key === 'Enter') document.getElementById('xxactualizar').click()
+    });
+
+    document.getElementById('ycontacto').addEventListener('click', () => 
+    {
+      loadInfoVitacora9(retornaDatal('xcliente','cliente'))
+    });
+
+    document.getElementById('ysaldo').addEventListener('click', () => 
+    {
+      loadInfoVitacora3(retornaDatal('xcliente','cliente'))
+    });
+
+    document.getElementById('yvendedor').addEventListener('click', () => 
+    {
+      loadInfoVitacora2(retornaDatal('xcliente','codvendedor'))
+    });    
+
+    loadInfoFpago()
+    loadInfoUnidades()
+
+////    loadInfoEscala()
+
+  }
+
+  async function activa_cant()
+  {
+    //if(document.getElementById('xcantidad').disabled) document.getElementById('xcantidad').removeAttribute('disabled');
+  }
+
+  function ocultacampos_medida(){
+    //$("#xtpeso option[value="+ valor +"]").attr("selected",true);
+        let seleccion = $('#xtpeso').find(":selected").text().trim();
+        //alert(seleccion);
+        if(seleccion=='Kilo' || seleccion==''){
+           document.getElementById('xcantidad').removeAttribute('disabled');
+           document.getElementById( 'divunidades' ).style.display = 'none';
+           $("#divunidades").removeClass( [ "d-flex" , "p-2", "tdatos" , "text-black"] );
+           $('#divunidades').hide();
+        }else{
+          document.getElementById('xcantidad').setAttribute('disabled','disabled');
+          $( "#divunidades" ).addClass( [ "d-flex" , "p-2", "tdatos" , "text-black"] );
+          $('#divunidades').show();
+          document.getElementById("divunidades").style.display = "";
+        }
+  }
+
+  
+  async function calcula_item()
+  {
+    var xkilos     = retornaDatal('xcantidad')
+    var xprecio    = document.getElementById('xprecio').value
+    var ximpuesto  = document.getElementById('ximpuesto').value
+    var xdescto    = document.getElementById('xdescto').value
+    asignaValor('xtotal_lin',MASK((xkilos*xprecio)*(100-xdescto)/100*(1+(ximpuesto/100)), "$##,###,###,##0.00"),'xtotal_lin')
+    asignaValor('xrentabilidad',(((xprecio*(100-xdescto)/100/retornaDatal('xproducto','prec_costo'))-1)*100).toFixed(2),'xrentabilidad')
+    document.getElementById('xxactualizar').removeAttribute('disabled');
+    document.getElementById('xxeliminar').removeAttribute('disabled');
+    showMensaje('Calculado')
+  }
+
+  async function loadInfoMail()
+  {
+      let xsql=` select first 20 id,correo,fe from ${empresa()}${base}correoclientes where codigoclte= '${retornaDatal('xcliente','cliente')}' order by id desc `;
+      loadInfo(xsql,cargaDataMail)
+  }
+
+  function cargaDataMail(data)
+  {
+    drilldown(data,'xmail',['correo','fe'],false)
+    espera.style.display='none'
+  }
+
+  async function loadInfoVitacora2(xven)
+  {
+    let xsql=` select ano,mes,left(item,2) as grupo,round(sum(cantidad),2) as cantidad, round(sum(valor),2) as total, 
+    round((sum(valor)-sum(prec_costo*cantidad))/sum(valor)*100,2) as rentabilidad
+    from ${empresa()}${base}v_mvtoinv i
+    left join ${empresa()}${base}v_clientes c on c.cliente=i.cliente
+    where codvendedor='${xven}' and ano=year(current)
+    group by ano,mes,grupo
+    order by ano,grupo,mes `
+    loadInfo(xsql,cargaDataVitacora2_new)
+  }
+
+    function cargaDataVitacora2_new(data)
+    {
+      if (data.length==0)
+      {
+        showMensaje('No Hay Datos')
+        return
+      } 
+      var xcampos=`[
+    {
+        title: "Año",
+        field: "ano",
+        width: 150
+    },
+    {
+        title: "Mes",
+        field: "mes",
+        width: 150
+    },
+    {
+        title: "Grupo",
+        field: "grupo",
+        width: 150,
+        cellClick: handleCellDblClick,
+        formatter:function(cell, formatterParams){
+          var value = cell.getValue();
+           return "<span style='color:rgb(70, 137, 235); text-decoration: underline; font-weight:bold;'>" + value + "</span>";} 
+    },
+    {
+        title: "Cantidad",
+        field: "cantidad",
+        width: 150,
+        hozAlign:"right",
+        formatter: "html"
+    },
+    {
+        title: "Total",
+        field: "total",
+        width: 150,
+        formatter:"money",
+        hozAlign:"right"
+    },
+    {
+        title: "Rentabilidad",
+        field: "rentabilidad",
+        width: 150,
+        hozAlign:"right",
+        formatter:"money"
+    }
+]`
+      ttable ('H','modalVG',data,'Ventas Grupos / '+document.getElementById('xnom_vend').value,xcampos,'','','modal-xl')
+      espera.style.display='none'
+    }
+
+  async function loadInfoVitacora3(xcli)
+  {
+    let xsql=` select m.codigo,cl.nombre,nrodocapli,min(femision) as emision,${empresa()}${base}proc_carterafv (m.nrodocapli,m.codigo) as vence,sum(valor+iva) as saldo,max((EXTEND(current, YEAR TO DAY) - EXTEND(femision, YEAR TO DAY))) AS dias 
+                from ${empresa()}${base}v_mvtoactivo1 m 
+                left join ${empresa()}${base}concxc c on c.codconcxc=m.codconcxc
+                left join ${empresa()}${base}clientes cl on cl.codigo=m.codigo
+                where m.codigo='${xcli}' 
+                group by m.codigo,cl.nombre,nrodocapli
+                having sum(valor+iva)<>0
+                order by emision `
+
+    loadInfo(xsql,cargaDataVitacora3_new)
+  }
+
+  function cargaDataVitacora3_new(data)
+  {
+    if (data.length==0)
+    {
+      showMensaje('No Hay Datos')
+      return
+    } 
+    acumrow(data,'saldo')
+    var xcampos=`
+    [
+      {
+          "title": "DOCUMENTO",
+          "field": "nrodocapli",
+          "width": 150,
+          cellClick: handleCellDblClick,
+          formatter:function(cell, formatterParams){
+            var value = cell.getValue();
+            return "<span style='color:rgb(70, 137, 235); text-decoration: underline; font-weight:bold;'>" + value + "</span>";} 
+      },
+      {
+          "title": "EMISION",
+          "field": "emision",
+          "width": 150
+      },
+      {
+          "title": "VENCE",
+          "field": "vence",
+          "width": 150
+      },
+      {
+          "title": "DIAS",
+          "field": "dias",
+          "width": 100,
+          "hozAlign":"right"
+      },
+      {
+          "title": "SALDO",
+          "field": "saldo",
+          "width": 150,
+          "formatter":"money",
+          "hozAlign":"right"
+      },
+      {
+          "title": "ACUMULADO",
+          "field": "acumulado",
+          "width": 200,
+          "formatter":"money",
+          "hozAlign":"right"
+      },
+      {
+          "title": "RADIAN",
+          "field": "radian",
+          "width": 130,
+          formatter:function(cell, formatterParams){
+            var value = cell.getValue() || '' ;
+            if (value.length<=4) return "<span style='background-color:rgb(251, 6, 3); display: block; color: white; padding-left: inherit;'>" + value + "</span>"; 
+            if (value.length==7) return "<span style='background-color:rgb(251, 192, 3); display: block; color: black; padding-left: inherit;'>" + value + "</span>"; 
+            if (value.length>=11) return "<span style='background-color:rgb(116, 226, 16); display: block; color: black; padding-left: inherit;'>" + value + "</span>"; 
+          } 
+      }
+    ]
+      `
+    ttable('H', 'modal1', data, `Cartera a Hoy / ${data[0].nombre} / ${data[0].codigo}`, xcampos, '', { click: 'Dbl_detalle_factura_cxc', dblclick: '' }, 'modal-xl');
+    var xtabla = Tabulator.prototype.constructor.findTable('#modal1Body')[0]
+    if (xtabla) 
+    for (let i = 0; i < data.length; i++) {
+      try {
+        google.script.run
+        .withSuccessHandler((rta)=>{
+////          data[i].radian = rta.eventos.join(",");
+          var registro=xtabla.getData()[i]
+          registro.radian=rta.eventos.join(",");
+          xtabla.updateData([registro])
+        })
+        .eventoRadian('890918272', (empresa() == 'invcxc' ? 'A1' : 'A2') + data[i].nrodocapli);
+      } catch (error) {
+        console.error('Error al consultar eventoRadian:', error);
+      }
+    }
+    espera.style.display = 'none';
+  }
+</script>
