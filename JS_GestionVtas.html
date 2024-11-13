@@ -58,9 +58,6 @@
         document.body.appendChild(ventanaEmergente);
       })
       loadInfoSucursal()
-      xproducto.addEventListener('input',loadInfoProducto);   // desactivado temporalmente
-//      xcliente.addEventListener("change", buscar_cliente);
-
     })
 //-------------------
     function onKeyDownCli(event) {
@@ -120,6 +117,10 @@
       if (e.value.length == 0 || e.value == '' || e.value.indexOf('|')==-1) return
       if (sw_msg) console.error('***buscar_producto***')
       asignaValor('xprecio',retornaDatal('xproducto','prec_esc0'),'xprecio')
+      asignaValor('xcosto',retornaDatal('xproducto','prec_costo'),'xcosto')
+      asignaValor('xpesot',retornaDatal('xproducto','peso_teo'),'xpesot')
+      asignaValor('xexist',retornaDatal('xproducto','existencia'),'xexist')
+      asignaValor('xexist_suc',retornaDatal('xproducto','existencia'),'xexist_suc')
       que=e.value.split('|').shift() // Extrae el primer elemento
       //alert('datalistProducto' + que);
       document.getElementById('xitem2').value=que;
@@ -134,7 +135,9 @@
           if (data.length==0){
             document.getElementById('xnorma').removeAttribute('disabled');
             document.getElementById('xgrado').removeAttribute('disabled');
-            document.getElementById('xtpeso').focus();  
+            document.getElementById('xtpeso').focus();
+            var keyboardEvent = new KeyboardEvent('keydown', {keyCode: 13});
+            e.dispatchEvent(keyboardEvent);
             return
           } 
           document.getElementById('xnorma').setAttribute('disabled', '');
@@ -434,6 +437,39 @@ console.log(data)
 //--------------------
 // Función para mostrar/ocultar el menú lateral al hacer clic en el icono de hamburguesa
   function toggleSidebar(e) 
+  {
+    document.getElementById('menuh').style.display = 'none'
+
+    var sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('active');
+    if (sidebar.classList.contains('active')) {
+      containner_centro.classList.remove('containner_centro');
+      containner_centro.classList.add('containner_centro_2');
+    } else {
+      containner_centro.classList.add('containner_centro');
+      containner_centro.classList.remove('containner_centro_2');
+    }
+    if (e===undefined) return
+    const contenedorCentro = document.querySelector('#containner_centro');
+    const secciones = contenedorCentro.querySelectorAll('section');
+
+    for (const seccion of secciones) {
+      // Accede a la información de cada sección
+//      console.log(`ID: ${seccion.id}`);
+//      console.log(`Contenido: ${seccion.textContent}`);
+      document.querySelector('#'+`${seccion.id}`).hidden=true
+      // Puedes realizar acciones con cada sección, como agregar estilos, modificar contenido, etc.
+    }
+
+    var idmodal='Mod'+e
+    showModal(idmodal,e,0)
+    var myModal = new bootstrap.Modal(document.getElementById(idmodal))  // Crea Ventana Modal
+    if (e=='Cotizaciones') {pag_Cotizaciones()} else if (e=='Pedidos') {pag_Pedidos()} else {pag_Remisiones()}
+    myModal.show()
+    document.getElementById('menuh').style.display = 'block'
+  }
+//---------------------
+  function toggleSidebarX(e) //Original
   {
     var sidebar = document.getElementById('sidebar');
     sidebar.classList.toggle('active');

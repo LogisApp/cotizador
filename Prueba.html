@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulario de Creación de Cliente</title>
+  <style>
+    /* Estilos generales */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* Contenedor del formulario */
+    .form-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      max-width: 800px;
+      width: 100%;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    /* Grid del formulario */
+    .form-grid {
+      display: grid;
+      gap: 15px;
+    }
+
+    /* Filas específicas */
+    .fila-3-col {
+      display: grid;
+      grid-template-columns: 1fr 2fr 2fr; /* 3 columnas */
+      gap: 15px;
+    }
+
+    .fila-2-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr; /* 2 columnas */
+      gap: 15px;
+    }
+
+    .form-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    label {
+      width: 80px; /* Ancho fijo para los labels */
+      font-weight: bold;
+      color: #555;
+    }
+
+    input {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      width: 100%;
+    }
+
+    #xcliente{
+      width: 28em;
+    }
+
+    #xcodigo{
+      width: 5em;
+    }
+
+    #ycodigo{
+      background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgOTYgOTYwIDk2MCIgd2lkdGg9IjQ4Ij48cGF0aCBkPSJNNDgwIDU3NXEtNjYgMC0xMDgtNDJ0LTQyLTEwOHEwLTY2IDQyLTEwOHQxMDgtNDJxNjYgMCAxMDggNDJ0NDIgMTA4cTAgNjYtNDIgMTA4dC0xMDggNDJaTTE2MCA4OTZ2LTk0cTAtMzggMTktNjV0NDktNDFxNjctMzAgMTI4LjUtNDVUNDgwIDYzNnE2MiAwIDEyMyAxNS41dDEyNy45MjEgNDQuNjk0cTMxLjMwMSAxNC4xMjYgNTAuMTkgNDAuOTY2UTgwMCA3NjQgODAwIDgwMnY5NEgxNjBabTYwLTYwaDUyMHYtMzRxMC0xNi05LjUtMzAuNVQ3MDcgNzUwcS02NC0zMS0xMTctNDIuNVQ0ODAgNjk2cS01NyAwLTExMSAxMS41VDI1MiA3NTBxLTE0IDctMjMgMjEuNXQtOSAzMC41djM0Wm0yNjAtMzIxcTM5IDAgNjQuNS0yNS41VDU3MCA0MjVxMC0zOS0yNS41LTY0LjVUNDgwIDMzNXEtMzkgMC02NC41IDI1LjVUMzkwIDQyNXEwIDM5IDI1LjUgNjQuNVQ0ODAgNTE1Wm0wLTkwWm0wIDQxMVoiLz48L3N2Zz4=");
+      width: 2em;
+      height: 1.5em;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center; 
+    /*    autocomplete: off; */
+    }
+
+  #xmail{
+    width: 35em;
+  }
+  #xnit{
+    width: 7em;
+  }
+  #xcontacto{
+    width: 15em;
+  }
+  #xcontactos{
+    width: 25em;
+  }
+  #xobserv_vta{
+    width: 30em;
+  }
+  #xfechapro, #xfechaent{
+    width: 7em; 
+  }
+  #xfpago{
+    width: 20em;
+  }
+
+  #ycontacto{
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgOTYgOTYwIDk2MCIgd2lkdGg9IjQ4Ij48cGF0aCBkPSJNNDAwIDU3MXEtNjYgMC0xMDgtNDJ0LTQyLTEwOHEwLTY2IDQyLTEwOHQxMDgtNDJxNjYgMCAxMDggNDJ0NDIgMTA4cTAgNjYtNDIgMTA4dC0xMDggNDJaTTgwIDg5MnYtOTRxMC0zNSAxNy41LTYzdDUwLjUtNDNxNzItMzIgMTMzLjUtNDZUNDAwIDYzMmgyM3EtNiAxNC05IDI3LjV0LTUgMzIuNWgtOXEtNTggMC0xMTMuNSAxMi41VDE3MiA3NDZxLTE2IDgtMjQgMjIuNXQtOCAyOS41djM0aDI2OXE1IDE4IDEyIDMyLjV0MTcgMjcuNUg4MFptNTg3IDQ0LTEwLTY2cS0xNy01LTM0LjUtMTQuNVQ1OTMgODM0bC01NSAxMi0yNS00MiA0Ny00NHEtMi05LTItMjV0Mi0yNWwtNDctNDQgMjUtNDIgNTUgMTJxMTItMTIgMjkuNS0yMS41VDY1NyA2MDBsMTAtNjZoNTRsMTAgNjZxMTcgNSAzNC41IDE0LjVUNzk1IDYzNmw1NS0xMiAyNSA0Mi00NyA0NHEyIDkgMiAyNXQtMiAyNWw0NyA0NC0yNSA0Mi01NS0xMnEtMTIgMTItMjkuNSAyMS41VDczMSA4NzBsLTEwIDY2aC01NFptMjctMTIxcTM2IDAgNTgtMjJ0MjItNThxMC0zNi0yMi01OHQtNTgtMjJxLTM2IDAtNTggMjJ0LTIyIDU4cTAgMzYgMjIgNTh0NTggMjJaTTQwMCA1MTFxMzkgMCA2NC41LTI1LjVUNDkwIDQyMXEwLTM5LTI1LjUtNjQuNVQ0MDAgMzMxcS0zOSAwLTY0LjUgMjUuNVQzMTAgNDIxcTAgMzkgMjUuNSA2NC41VDQwMCA1MTFabTAtOTBabTkgNDExWiIvPjwvc3ZnPg==");
+    width: 2em;
+    height: 1.5em;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center; 
+/*    autocomplete: off; */
+  }
+
+  #xtelefono{
+    width: 15em;
+  }
+  #ytelefono{
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iMjRweCIgZmlsbD0iIzAwMDAwMCI+PHBhdGggZD0iTTAgMGgyNHYyNEgwVjB6IiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTE1LjUgMWgtOEM2LjEyIDEgNSAyLjEyIDUgMy41djE3QzUgMjEuODggNi4xMiAyMyA3LjUgMjNoOGMxLjM4IDAgMi41LTEuMTIgMi41LTIuNXYtMTdDMTggMi4xMiAxNi44OCAxIDE1LjUgMXptLTQgMjFjLS44MyAwLTEuNS0uNjctMS41LTEuNXMuNjctMS41IDEuNS0xLjUgMS41LjY3IDEuNSAxLjUtLjY3IDEuNS0xLjUgMS41em00LjUtNEg3VjRoOXYxNHoiLz48L3N2Zz4=");
+    width: 2em
+    height: 1.7vw;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center; 
+/*    autocomplete: off; */
+  }
+  #xciudad{
+    width: 10vw;
+  }
+  #yciudad{
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgOTYgOTYwIDk2MCIgd2lkdGg9IjQ4Ij48cGF0aCBkPSJNMjIwIDg3NmgxNTBWNjI2aDIyMHYyNTBoMTUwVjQ4Nkw0ODAgMjkxIDIyMCA0ODZ2MzkwWm0tNjAgNjBWNDU2bDMyMC0yNDAgMzIwIDI0MHY0ODBINTMwVjY4Nkg0MzB2MjUwSDE2MFptMzIwLTM1M1oiLz48L3N2Zz4=");
+    width: 2em
+    height: 1.7vw;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center; 
+/*    autocomplete: off; */
+  }
+
+  #xvendedor{
+    width: 3vw;
+  }
+  #yvendedor{
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgOTYgOTYwIDk2MCIgd2lkdGg9IjQ4Ij48cGF0aCBkPSJNMTY3IDk3NlY3NTNoMTA0djIyM0gxNjdabTIxMiAwVjQ2MXEtNTQgMjQtODEgNjd0LTI3IDExMmgtNjBxMC0xMjIgNzMtMTg5dDE5OC02N3ExMDkgMCAxNjctNDAuNVQ3MDcgMjAwaDYwcTAgOTUtNDMuNSAxNTMuNVQ1OTAgNDMzdjU0M2gtNjBWNzIxaC05MXYyNTVoLTYwWm0xMDMuMDgtNjU0cS0zMC4wOCAwLTUxLjU4LTIxLjQyLTIxLjUtMjEuNDIxLTIxLjUtNTEuNSAwLTMwLjA4IDIxLjQyLTUxLjU4IDIxLjQyMS0yMS41IDUxLjUtMjEuNSAzMC4wOCAwIDUxLjU4IDIxLjQyIDIxLjUgMjEuNDIxIDIxLjUgNTEuNSAwIDMwLjA4LTIxLjQyIDUxLjU4LTIxLjQyMSAyMS41LTUxLjUgMjEuNVoiLz48L3N2Zz4=");
+    width: 2em;
+    height: 1.5em;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center; 
+/*    autocomplete: off; */
+  }
+
+  #xnom_vend{
+    width: 15em;
+    margin-left:1em;
+  }
+
+  #xreg_cal{
+    width: 2vw;
+  }
+
+  #xobservaciones{
+    width: 100vw;
+    font-size: 0.7vw;
+  }
+
+
+    /* Botón de envío */
+    .submit-btn {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+    }
+
+    .submit-btn:hover {
+      background-color: #45a049;
+    }
+
+    /* Responsividad para pantallas pequeñas */
+    @media (max-width: 768px) {
+      .fila-3-col, .fila-2-col {
+        grid-template-columns: 1fr; /* Una columna en móviles */
+      }
+    }
+  </style>
+
+</head>
+<body>
+  <div class="form-container">
+    <h2>Crear Cliente</h2>
+
+    <form>
+      <!-- Primera fila: Cédula, Nombre, Apellido -->
+      <div class="fila-3-col">
+        <div class="form-group">
+          <label class='tit1' for="cedula">Cliente</label>
+
+            <span class='aria-pressed="true" hvr-pulse-shrink' id='ycontacto' title="Condiciones Comerciales"></span>
+
+          <input class="form-control input " list="datalistCliente" id="xcliente" type='search'  placeholder="Digite para buscar..." autocomplete="off"> 
+            <datalist id="datalistCliente" class="form-control-sm tit0" type="search"></datalist>
+
+        </div>
+        <div class="form-group">
+          <label for="nombre">Codigo</label>
+
+            <span class='aria-pressed="true" hvr-pulse-shrink' id='ysaldo' title="Cartera Pendiente" disabled></span>
+
+          <input class="form-control input" name="campo"  type="text" id= "xcodigo" placeholder="" aria-label="Disabled input example" disabled >
+        </div>
+
+        <div class="form-group">
+          <label for="apellido">Vendedor</label>
+
+            <span id='yvendedor' title="Ventas Vendedor" class="Idisabled hvr-pulse-shrink"></span>
+
+          <input class="form-control input" name="campo"  type="text" id= "xvendedor" placeholder="" aria-label="Disabled input example" disabled >
+          <input class="form-control input" name="campo"  type="text" id= "xnom_vend" placeholder="" aria-label="Disabled input example" disabled >
+        </div>
+      </div>
+
+      <div class="d-flex p-2 tdatos2 text-white">
+
+        <div class="tit1">Mail</div>
+        <div style="flex: 2;" > 
+          <select class="form-select input tit0"  id="xmail" select="datalistMail" readonly></select>  
+        </div>
+
+        <div class="tit1">Contacto</div>
+        <span class='aria-pressed="true" hvr-pulse-shrink' id='ycontacto' title="Agregar Contacto"></span>
+        <div style="flex: 1;" > 
+          <input class="form-control input" name="campo"  type="text" id= "xcontactos" placeholder="" aria-label="Disabled input example" >
+        </div>
+
+      </div>
+
+      <!-- Segunda fila: Ciudad y Teléfono -->
+      <div class="fila-2-col">
+        <div class="form-group">
+          <label for="ciudad">Ciudad</label>
+          <input type="text" id="ciudad" name="ciudad" required>
+        </div>
+        <div class="form-group">
+          <label for="telefono">Teléfono</label>
+          <input type="text" id="telefono" name="telefono" required>
+        </div>
+      </div>
+
+      <!-- Tercera fila: Dirección y País -->
+      <div class="fila-2-col">
+        <div class="form-group">
+          <label for="direccion">Dirección</label>
+          <input type="text" id="direccion" name="direccion" required>
+        </div>
+        <div class="form-group">
+          <label for="pais">País</label>
+          <input type="text" id="pais" name="pais" required>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn">Guardar Cliente</button>
+    </form>
+  </div>
+
+    <!--- API de Google------>
+    <script src="https://apis.google.com/js/api.js"></script>
+
+    <?!= include('JS_Louis'); ?>
+    <?!= include('JS_GestionVtas'); ?>
+</body>
+</html>

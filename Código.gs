@@ -51,6 +51,10 @@ function getPage(page){
   return [html, page]
 }
 
+function getUrl(){
+  return ScriptApp.getService().getUrl();
+}
+
 function getDataSql(sql)
 {
 //  var sql='select * from cempresa'

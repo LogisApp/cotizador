@@ -40,10 +40,8 @@
           <input class="form-control input" name="campo"  type="text" id= "xcontactos" placeholder="" aria-label="Disabled input example" >
         </div>
 <div></div>
-
-      </div>
-`
-var pag1=`
+      </div> `
+  var pag1=`
       <div class="d-flex p-2 tdatos2 text-white">
         <div class="tit1" title="Forma de Pago">F.Pago</div>
         <select class="form-select input xfpago"  id="xfpago" select="datalistFpago"></select>
@@ -79,88 +77,112 @@ var pag1=`
 
         <div style="flex: 0.6;" class="input-wrapper cinput">
           <div class="tit0">T.Peso</div>
-            <select class="form-select input"  name="xtpeso" id="xtpeso" select="datalistUnidades" onchange="ocultacampos_medida()"> </select>
-        </div>
-
-        <div style="flex: 1;" class="cinput">
-          <div class="tit0">Cantidad</div>
-          <input class="form-control input_n" name="xcantidad" id= "xcantidad" type="number" placeholder="0.0" aria-label="Disabled input example" value=0 min="0" onchange="calcula_item()" disabled>
+            <select class="form-select input"  name="xtpeso" id="xtpeso" select="datalistUnidades"> </select>
         </div>
 
         <div style="flex: 0.6;"class="cinput">
           <div class="tit0" title="Tipo de Precio">TPrecio</div>
           	<select class="form-select input" id="xtprecio" name="xtprecio">
-              <option value="K">Kilos</option>
-              <option value="U">Unidades</option>
+              <option value="K">1.Kilos</option>
+              <option value="U">9.Unidades</option>
             </select>
+        </div>
+
+        <div style="flex: 1;" class="cinput">
+          <div class="tit0">Kilos</div>
+          <input class="form-control input_n" name="xkilos" id= "xkilos" type="number" placeholder="0.0" aria-label="Disabled input example" value=0 min="0" onchange="calcula_item()" disabled>
         </div>
 
         <div style="flex: 1;"class="cinput">
           <div class="tit0">Precio</div>
-          <input class="form-control input_n" name="xprecio" id= "xprecio" type="number" placeholder="0.0" aria-label="Disabled input example" value=0 onchange="calcula_item()">
+          <input class="form-control input_n" name="xprecio" id= "xprecio" type="number" placeholder="0.0" aria-label="Disabled input example" value=0 min="0" onchange="calcula_item()">
         </div>
 
-        <div style="flex: 0.5;"class="cinput">
+        <div style="flex: 1;" class="cinput">
+          <div class="tit0">Unidades</div>
+          <input class="form-control input_n" name="xunds" id= "xunds" type="number" placeholder="0.0" aria-label="Disabled input example" value=0 min="0" onchange="calcula_item()" disabled>
+        </div>
+
+        <div style="flex: 0.6;"class="cinput">
           <div class="tit0">Impuesto</div>
           <input class="form-control input_n" name="ximpuesto" id= "ximpuesto" type="number" placeholder="0.0" aria-label="Disabled input example" disabled value=0 >
         </div>
 
-        <div style="flex: 0.5;"class="cinput">
-          <div class="tit0">Descto</div>
+        <div style="flex: 0.6;"class="cinput">
+          <div class="tit0">%Descto</div>
           <input class="form-control input_n" name="campo" id= "xdescto" type="number" placeholder="0.0" aria-label="Disabled input example" value=0 min="0" max="100" onchange="calcula_item()">
         </div>
 
-        <div style="flex: 1.5;"class="cinput">
-          <div class="tit0">Total</div>
-          <input class="form-control input_n" name="campo" id= "xtotal_lin"  placeholder="0.0" aria-label="Disabled input example" disabled value="0" step="0.01">
-        </div>
-
-        <div style="flex: 0.5;"class="cinput">
-          <div class="tit0" title="Rentabilidad">%</div>
+        <div style="flex: 0.6;"class="cinput">
+          <div class="tit0" title="Rentabilidad">Rtab%</div>
           <input class="form-control input_n" name="campo" id= "xrentabilidad" type="number" placeholder="0.0" aria-label="Disabled input example" disabled value=0 >
-        </div>
-
-        <div style="flex: 0.5;"class="cinput">
-          <div class="tit0" title="Buzon">Buzon</div>
-          <input class="form-control input_n" name="campo" id= "xbuzon" type="text" placeholder="" aria-label="Disabled input example" value ='Z' disabled>
         </div>
   
       </div>
       
       <!--inicio---!>
 
+      <div class="d-flex p-2 tdatos text-black">
 
-      <div class="" id="divunidades" style="display:none">
-       
-        <div style="flex: 0.5;" class="cinput">
-          <div class="tit0">Medida</div>
-            <select class="form-select input" id="xmedida" name="xmedida">
-              <option value="1">Metros</option>
-              <option value="2">Pulgadas</option>
-            </select>
+        <div style="flex: 0.1;"class="cinput">
+          <div class="tit0" title="Buzon">Buzon</div>
+          <input class="form-control input_n" name="campo" id= "xbuzon" type="text" placeholder="" aria-label="Disabled input example" value ='Z' disabled>
         </div>
 
         <div style="flex: 0.5;" class="cinput">
-          <div class="tit0">¿Cuántos Metros?</div>
-          <input class="form-control input_n" name="xmetros" id="xmetros" type="number" placeholder="0" aria-label="Disabled input example" value="0" min="0" max="">
+          <div class="tit0">Costo</div>
+          <input class="form-control input_n" name="xcosto" id="xcosto" type="number" placeholder="0" aria-label="Disabled input example" value="0" min="0" max="" disabled>
         </div>
 
         <div style="flex: 0.5;" class="cinput">
-           <div class="tit0">¿Cuántos Centímetros?</div>
-          <input class="form-control input_n" name="xcentimetros" id="xcentimetros" type="number" placeholder="0" aria-label="Disabled input example" value="0" min="0" max="100">
+          <div class="tit0">Peso Teorico</div>
+          <input class="form-control input_n" name="xpesot" id="xpesot" type="number" placeholder="0" aria-label="Disabled input example" value="0" min="0" max="" disabled>
         </div>
 
         <div style="flex: 0.5;" class="cinput">
-           <div class="tit0">¿Cuántos Milímetros?</div>
-          <input class="form-control input_n" name="xmilimetros" id="xmilimetros" type="number" placeholder="0" aria-label="Disabled input example" value="0" min="0" max="10">
+          <div class="tit0">Existencia</div>
+          <input class="form-control input_n" name="xexist" id="xexist" type="number" placeholder="0" aria-label="Disabled input example" value="0" min="0" max="" disabled>
         </div>
-    
+
+        <div style="flex: 0.5;" class="cinput">
+          <div class="tit0">Exis.Sucursal</div>
+          <input class="form-control input_n" name="xexist_suc" id="xexist_suc" type="number" placeholder="0" aria-label="Disabled input example" value="0" min="0" max="" disabled>
+        </div>
+
+        <div class="" id="divunidades" style="display:none">
+          <div style="flex: 0.5;" class="cinput">
+            <div class="tit0">Medida</div>
+              <select class="form-select input" id="xmedida" name="xmedida">
+                <option value="1">1.Metros</option>
+                <option value="2">2.Pulgadas</option>
+              </select>
+          </div>
+
+          <div style="flex: 0.5;" class="cinput">
+            <div class="tit0">Metros</div>
+            <input class="form-control input_n" name="xmetros" id="xmetros" type="number" placeholder="0" aria-label="Disabled input example" value="0" min="0" max="">
+          </div>
+
+          <div style="flex: 0.5;" class="cinput">
+            <div class="tit0">Centímetros</div>
+            <input class="form-control input_n" name="xcentimetros" id="xcentimetros" type="number" placeholder="0" aria-label="Disabled input example" value="0" min="0" max="100">
+          </div>
+
+          <div style="flex: 0.5;" class="cinput">
+            <div class="tit0">Milímetros</div>
+            <input class="form-control input_n" name="xmilimetros" id="xmilimetros" type="number" placeholder="0" aria-label="Disabled input example" value="0" min="0" max="10">
+          </div>
+
+        </div>
+
+        <div style="flex: 0.5;"class="cinput">
+          <div class="tit0">Total</div>
+          <input class="form-control input_n" name="campo" id= "xtotal_lin"  placeholder="0.0" aria-label="Disabled input example" disabled value="0" step="0.01">
+        </div>
+
       </div>
 
-
       <!---fin--!>
-
-
 
       <div class="d-flex p-2 tdatos2 text-white">
 
@@ -247,15 +269,33 @@ var pag1=`
 
       <div id="TCotizacion"></div>
       `
-pag=pag0+pag1
-    document.getElementById('ModCotizacionesBody').innerHTML=pag
-    document.getElementById('xcliente').focus();
+  pag=pag0+pag1
+  document.getElementById('ModCotizacionesBody').innerHTML=pag
+  document.getElementById('xcliente').focus();
 
-$(document).ready(() => {
+  function saltarAlSiguiente(event) {
+    if (event.keyCode === 13000000000000) {
+console.log('salto')
+      event.preventDefault(); // Evita que se envíe el formulario
+      var inputs = document.querySelectorAll('input, select');
+      var index = Array.from(inputs).indexOf(event.target);
+      if (index !== inputs.length - 1) {
+        inputs[index + 1].focus();
+      }
+    }
+  }
 
+  // Obtener todos los elementos select
+  var selects = document.querySelectorAll('input');
 
+  // Agregar el evento keydown a cada select
+  selects.forEach(function(select) {
+    select.addEventListener('keydown', saltarAlSiguiente);
+  });
 
-  var table = new Tabulator("#TCotizacion", {
+  $(document).ready(() => {
+
+    var table = new Tabulator("#TCotizacion", {
     data:tableData, //set initial table data
     responsiveLayout: true,
     maxHeight:"30%",
@@ -309,33 +349,35 @@ $(document).ready(() => {
         {title:"causa2", field:"causa2"},
         {title:"tipo_fentr", field:"tipo_fentr"},
         {title:"flete_kg", field:"flete_kg"},
-    ]
-  });
-  // Funcion click sobre la fila
-  table.on("rowClick", function(e, row){
-  //      console.log(row)
-  //      obj=row._row.data
-  //      console.log(obj)
-    table.deselectRow();
-    row.select();
-  });
-  // Agregar el evento al elemento padre
-  $(".d-flex").on("click", ".xxactualizar", ()=>{
-    $('#xxactualizar').prop('disabled', true); // Para deshabilitar el elemento
-//    $('#xxeliminar').prop('disabled', true); // Para deshabilitar el elemento
+      ]
+    });
+    // Funcion click sobre la fila
+    table.on("rowClick", function(e, row){
+    //      console.log(row)
+    //      obj=row._row.data
+    //      console.log(obj)
+      table.deselectRow();
+      row.select();
+    });
+    // Agregar el evento al elemento padre
+    $(".d-flex").on("click", ".xxactualizar", ()=>{
+      $('#xxactualizar').prop('disabled', true); // Para deshabilitar el elemento
+    //    $('#xxeliminar').prop('disabled', true); // Para deshabilitar el elemento
     var tableData  = [
-    {vendedor    : retornaDatal('xvendedor'), 
-    fech_vtas    : fecha(new Date(),0,'mdy'), 
-    hora_vtas    : hora(), 
-    item         : retornaDatal('xproducto').split("|").shift(), 
-    grado        : retornaDatal('xgrado'), 
-    kilos        : retornaDatal('xcantidad'), 
-    precio       : retornaDatal('xprecio'), 
-    descuento    : retornaDatal('xdescto'),
-    fech_entrega : retornaDatal('xfechaent'),
-    obs_vtas     : retornaDatal('xobserv_vta'),
-    cot_ped      : 'S', // S=Cotizacion P=Pedido
-    item_ci      : retornaDatal('xitem2')}
+    {
+      vendedor    : retornaDatal('xvendedor'), 
+      fech_vtas    : fecha(new Date(),0,'mdy'), 
+      hora_vtas    : hora(), 
+      item         : retornaDatal('xproducto').split("|").shift(), 
+      grado        : retornaDatal('xgrado'), 
+      kilos        : retornaDatal('xkilos'), 
+      precio       : retornaDatal('xprecio'), 
+      descuento    : retornaDatal('xdescto'),
+      fech_entrega : retornaDatal('xfechaent'),
+      obs_vtas     : retornaDatal('xobserv_vta'),
+      cot_ped      : 'S', // S=Cotizacion P=Pedido
+      item_ci      : retornaDatal('xitem2')
+    }
     ]
     table.addData(tableData, true)
     asignaValor('xproducto','')
@@ -344,7 +386,7 @@ $(document).ready(() => {
     asignaValor('xobserv_vta','')
     asignaValor('xpedidos','')
     asignaValor('xexistencia','')
-    asignaValor('xcantidad',0)
+    asignaValor('xkilos',0)
     document.getElementById('xproducto').focus()
   });
   // Seleccionar el botón por su ID
@@ -389,21 +431,27 @@ $(document).ready(() => {
 
     document.getElementById('xtpeso').addEventListener('keydown', (event) => 
     {
-      if (event.key === 'Enter') document.getElementById('xcantidad').focus()
+      if (event.key === 'Enter') document.getElementById('xtprecio').focus()
     });
 
-    document.getElementById('xcantidad').addEventListener('keydown', (event) => 
+    document.getElementById('xtprecio').addEventListener('keydown', (event)=> 
     {
-      if (event.key === 'Enter' && retornaDatal('xcantidad')>0) document.getElementById('xtprecio').focus()
+      ocultacampos_medida()
+      document.getElementById('xmedida').focus()
     });
 
-    document.getElementById('xtprecio').addEventListener('click', ()=> 
+    document.getElementById('xkilos').addEventListener('keydown', (event) => 
     {
-      document.getElementById('xprecio').focus()
+      if (event.key === 'Enter' && retornaDatal('xkilos')>0) document.getElementById('xprecio').focus()
     });
 
     document.getElementById('xprecio').addEventListener('keydown', (event) => 
     {
+      if (parseFloat(document.getElementById('xprecio').value) <= parseFloat(document.getElementById('xcosto').value)) 
+      {
+        document.getElementById('xprecio').focus()
+        return
+      }
       if (event.key === 'Enter') document.getElementById('xobserv_vta').focus()
     });
 
@@ -446,31 +494,62 @@ $(document).ready(() => {
 
   async function activa_cant()
   {
-    //if(document.getElementById('xcantidad').disabled) document.getElementById('xcantidad').removeAttribute('disabled');
+    //if(document.getElementById('xkilos').disabled) document.getElementById('xkilos').removeAttribute('disabled');
   }
 
-  function ocultacampos_medida(){
-    //$("#xtpeso option[value="+ valor +"]").attr("selected",true);
-        let seleccion = $('#xtpeso').find(":selected").text().trim();
-        //alert(seleccion);
-        if(seleccion=='Kilo' || seleccion==''){
-           document.getElementById('xcantidad').removeAttribute('disabled');
-           document.getElementById( 'divunidades' ).style.display = 'none';
-           $("#divunidades").removeClass( [ "d-flex" , "p-2", "tdatos" , "text-black"] );
-           $('#divunidades').hide();
-        }else{
-          document.getElementById('xcantidad').setAttribute('disabled','disabled');
-          $( "#divunidades" ).addClass( [ "d-flex" , "p-2", "tdatos" , "text-black"] );
-          $('#divunidades').show();
-          document.getElementById("divunidades").style.display = "";
-        }
+  function ocultacampos_medida()
+  {
+console.log('coulta')
+    let seleccion1 = $('#xtpeso').find(":selected").text().trim();
+    let seleccion2 = $('#xtprecio').find(":selected").text().trim();
+    if(seleccion1=='1.Tramo' || seleccion2=='xxx1.Kilos'){
+      $( "#divunidades" ).addClass( [ "d-flex" , "p-0", "tdatos" , "text-black"] );
+      $('#divunidades').show();
+      document.getElementById("divunidades").style.display = "";
+      document.getElementById('xmetros').removeAttribute('disabled');
+      document.getElementById('xcentimetros').removeAttribute('disabled');
+      document.getElementById('xmilimetros').removeAttribute('disabled');
+      document.getElementById('xmetros').focus();
+    }else{
+      $("#divunidades").removeClass( [ "d-flex" , "p-0", "tdatos" , "text-black"] );
+      $('#divunidades').hide();
+      document.getElementById('xtprecio').focus();
+      document.getElementById('divunidades').style.display = 'none';
+      document.getElementById('xkilos').removeAttribute('disabled');
+      document.getElementById('xkilos').setAttribute('disabled','disabled');
+////      $( "#divunidades2" ).addClass( [ "d-flex" , "p-0", "tdatos" , "text-black"] );
+////      $('#divunidades2').show();
+      document.getElementById('xmedida').focus();
+    }
   }
 
+  function campo_metros()
+  {
+    let seleccion = $('#xmedida').find(":selected").text().trim();
+    if(seleccion=='2.Pulgadas')
+    {
+      document.getElementById('xmetros').setAttribute('disabled','disabled');
+      document.getElementById('xcentimetros').setAttribute('disabled','disabled');
+      document.getElementById('xmilimetros').setAttribute('disabled','disabled');
+      document.getElementById('xkilos').removeAttribute('disabled');
+      document.getElementById('xkilos').focus();
+    }
+    else
+    {
+      document.getElementById('xmetros').focus();
+      document.getElementById('xmetros').removeAttribute('disabled');
+      document.getElementById('xcentimetros').removeAttribute('disabled');
+      document.getElementById('xmilimetros').removeAttribute('disabled');
+    }
+  }
   
   async function calcula_item()
   {
-    var xkilos     = retornaDatal('xcantidad')
-    var xprecio    = document.getElementById('xprecio').value
+    var xprecio   = parseFloat(document.getElementById('xprecio').value)
+    var xcosto    = parseFloat(document.getElementById('xcosto').value)
+console.log(xprecio,xcosto)
+    if (xprecio<xcosto) return
+    var xkilos     = retornaDatal('xkilos')
     var ximpuesto  = document.getElementById('ximpuesto').value
     var xdescto    = document.getElementById('xdescto').value
     asignaValor('xtotal_lin',MASK((xkilos*xprecio)*(100-xdescto)/100*(1+(ximpuesto/100)), "$##,###,###,##0.00"),'xtotal_lin')
@@ -494,8 +573,8 @@ $(document).ready(() => {
 
   async function loadInfoVitacora2(xven)
   {
-    let xsql=` select ano,mes,left(item,2) as grupo,round(sum(cantidad),2) as cantidad, round(sum(valor),2) as total, 
-    round((sum(valor)-sum(prec_costo*cantidad))/sum(valor)*100,2) as rentabilidad
+    let xsql=` select ano,mes,left(item,2) as grupo,round(sum(kilos),2) as kilos, round(sum(valor),2) as total, 
+    round((sum(valor)-sum(prec_costo*kilos))/sum(valor)*100,2) as rentabilidad
     from ${empresa()}${base}v_mvtoinv i
     left join ${empresa()}${base}v_clientes c on c.cliente=i.cliente
     where codvendedor='${xven}' and ano=year(current)
@@ -532,8 +611,8 @@ $(document).ready(() => {
            return "<span style='color:rgb(70, 137, 235); text-decoration: underline; font-weight:bold;'>" + value + "</span>";} 
     },
     {
-        title: "Cantidad",
-        field: "cantidad",
+        title: "kilos",
+        field: "kilos",
         width: 150,
         hozAlign:"right",
         formatter: "html"

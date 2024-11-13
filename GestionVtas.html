@@ -26,8 +26,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W8TXGLHK"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-  <div class="header">
-    <span class="titulo menu-icon" id='titulo' onclick="toggleSidebar()"> &#9776; Gestion de Ventas</span>
+  <div class="header d-flex">
+    <span class="menuh menu-icon" id='menuh' onclick="toggleSidebar()" style="display:'none;'"> &#9776;</span> 
+    <span class="titulo" style="flex-grow: 1;">Gestion de Ventas</span>
   </div>
   <div class="d-flex t-2 bg-secondary text-white">
     <div class="tit">Sucursal</div>
@@ -97,11 +98,54 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!--- BootBox Modale de Pregunta Si/No, etc------>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<!--Inicio del Script de Chat-->
+    <script type="text/javascript">
+        (function() {
+             initChatWidget();
+        })();
+
+        function initChatWidget() {
+            var chatButton = document.createElement("div");
+            chatButton.style.position = "fixed";
+            chatButton.style.bottom = "20px";
+            chatButton.style.right = "20px";
+            chatButton.style.backgroundColor = "#007bff";
+            chatButton.style.color = "white";
+            chatButton.style.padding = "10px";
+            chatButton.style.borderRadius = "50%";
+            chatButton.style.cursor = "pointer";
+            chatButton.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.2)";
+            chatButton.style.fontSize = "16px";
+            chatButton.innerHTML = `<svg width="32px" height="32px" viewBox="0 0 5.12 5.12" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path cx="16" cy="16" r="16" fill="#1C98F7" d="M5.12 2.56a2.56 2.56 0 0 1 -2.56 2.56 2.56 2.56 0 0 1 -2.56 -2.56 2.56 2.56 0 0 1 5.12 0"/><path fill="#FFF" d="M2.605 3.732a1.92 1.92 0 0 0 0.333 -0.054 0.896 0.896 0 0 0 0.416 0.028l0.017 -0.001c0.049 0 0.115 0.029 0.21 0.09v-0.1a0.096 0.096 0 0 1 0.05 -0.085q0.062 -0.035 0.115 -0.08a0.576 0.576 0 0 0 0.216 -0.438q-0.001 -0.084 -0.026 -0.161 0.063 -0.117 0.1 -0.245a0.736 0.736 0 0 1 0.124 0.406c0 0.225 -0.105 0.435 -0.285 0.588a1.28 1.28 0 0 1 -0.095 0.071v0.234a0.099 0.099 0 0 1 -0.158 0.079 2.56 2.56 0 0 0 -0.192 -0.13 0.64 0.64 0 0 0 -0.059 -0.03q-0.082 0.012 -0.166 0.012c-0.226 0 -0.435 -0.068 -0.599 -0.181zM1.41 3.264c-0.285 -0.241 -0.45 -0.572 -0.45 -0.925 0 -0.722 0.682 -1.299 1.513 -1.299s1.514 0.577 1.514 1.299c0 0.723 -0.682 1.299 -1.514 1.299q-0.141 0 -0.276 -0.022c-0.039 0.01 -0.196 0.102 -0.422 0.267a0.124 0.124 0 0 1 -0.198 -0.099v-0.399a1.28 1.28 0 0 1 -0.167 -0.122m0.792 0.107q0.01 0 0.021 0.002 0.124 0.02 0.25 0.021c0.703 0 1.265 -0.477 1.265 -1.054s-0.563 -1.054 -1.265 -1.054c-0.702 0 -1.265 0.477 -1.265 1.054 0 0.279 0.131 0.543 0.364 0.739q0.088 0.074 0.191 0.133c0.038 0.022 0.063 0.063 0.063 0.106v0.23c0.179 -0.12 0.296 -0.177 0.377 -0.177m-0.374 -0.787a0.198 0.198 0 0 1 -0.198 -0.196c0 -0.108 0.089 -0.196 0.198 -0.196s0.198 0.088 0.198 0.196 -0.089 0.196 -0.198 0.196m0.645 0a0.198 0.198 0 0 1 -0.198 -0.196c0 -0.108 0.089 -0.196 0.198 -0.196s0.198 0.088 0.198 0.196 -0.089 0.196 -0.198 0.196m0.645 0a0.198 0.198 0 0 1 -0.198 -0.196c0 -0.108 0.089 -0.196 0.198 -0.196s0.198 0.088 0.198 0.196 -0.089 0.196 -0.198 0.196"/></g></svg>`;
+            document.body.appendChild(chatButton);
+
+            chatButton.onclick = function() {
+                var chatModal = document.createElement("div");
+                chatModal.style.position = "fixed";
+                chatModal.style.bottom = "0";
+                chatModal.style.right = "20px";
+                chatModal.style.width = "400px";
+                chatModal.style.height = "600px";
+                chatModal.style.borderRadius = "10px";
+                chatModal.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.3)";
+                chatModal.style.backgroundColor = "#fff";
+                chatModal.innerHTML = `
+                    <div style="position: relative; width: 100%; height: 100%;">
+                        <span style="position: absolute; top: 10px; right: 20px; cursor: pointer; font-size: 24px;" onclick="document.body.removeChild(this.parentElement.parentElement)">&times;</span>
+                        <iframe src="https://script.google.com/macros/s/AKfycbyZmG-lp4Urwn0uErHGc6Yv1AlTBu_YIxQv_bV7Ii7We2Q_xmZ_e-Mq9JCyLOt7y2N6/exec" style="width: 100%; height: 100%; border: none;"></iframe>
+                    </div>
+                `;
+                document.body.appendChild(chatModal);
+            };
+        }
+    </script>
+    <!--Fin del Script de Chat-->
+
     <?!= include('JS_Louis'); ?>
     <?!= include('JS_GestionVtas'); ?>
-    <?!= include('GestionVtasCotizaciones'); ?>
-    <?!= include('GestionVtasPedidos'); ?>
-    <?!= include('GestionVtasRemisiones'); ?>
+    <?!= include('GestionPagCotizaciones'); ?>
+    <?!= include('GestionPagPedidos'); ?>
+    <?!= include('GestionPagRemisiones'); ?>
     <?!= include('MOD_Cotizaciones1'); ?>
     <?!= include('MOD_Cotizaciones2'); ?>
 </body>
